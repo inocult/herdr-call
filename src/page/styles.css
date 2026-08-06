@@ -1,0 +1,661 @@
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("https://herdr.dev/assets/jbm.woff2?v=2") format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #17171a;
+  --panel: #1e1e22;
+  --mass: #26262b;
+  --ink: #eae8ee;
+  --dim: #bdb9c9;
+  --faint: #8e8a98;
+  --line: #26262b;
+  --line-strong: #35353d;
+  --spot: #cba6f7;
+  --spot-ink: #17171a;
+  --grid: #202024;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --teal: #94e2d5;
+  --display: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: clip;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+body::selection {
+  background: var(--spot);
+  color: var(--spot-ink);
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.42;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.app-shell {
+  isolation: isolate;
+  display: grid;
+  width: min(100%, 90rem);
+  min-height: 100svh;
+  grid-template-rows: auto 1fr;
+  margin: 0 auto;
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
+  background: var(--bg);
+}
+
+.topbar {
+  display: flex;
+  height: 3.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 2.125rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.1em;
+}
+
+.privacy-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.privacy-dot,
+.status-dot {
+  display: inline-block;
+  flex: none;
+  border-radius: 999px;
+}
+
+.privacy-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  background: var(--green);
+  box-shadow: 0 0 0.875rem rgba(166, 227, 161, 0.42);
+}
+
+.call-stage {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.625rem;
+  overflow: hidden;
+  padding: 4.5rem 2.125rem 5.5rem;
+  text-align: center;
+}
+
+.call-stage::before {
+  position: absolute;
+  top: 14%;
+  right: -8rem;
+  width: 26rem;
+  height: 26rem;
+  border: 1px solid var(--line);
+  content: "";
+  opacity: 0.7;
+  transform: rotate(45deg);
+}
+
+.call-stage::after {
+  position: absolute;
+  bottom: -11rem;
+  left: -8rem;
+  width: 24rem;
+  height: 24rem;
+  border: 1px solid var(--line);
+  content: "";
+  opacity: 0.7;
+  transform: rotate(45deg);
+}
+
+.heading-group,
+.voice-field,
+.status-line,
+.error-message,
+.start-controls,
+.call-controls {
+  position: relative;
+  z-index: 1;
+}
+
+.heading-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 0;
+  color: var(--spot);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.eyebrow span {
+  width: 2.625rem;
+  height: 1px;
+  background: var(--spot);
+}
+
+h1 {
+  max-width: 14ch;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: clamp(3.25rem, 7.2vw, 6.75rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.88;
+  text-wrap: balance;
+}
+
+h1 em {
+  color: var(--spot);
+  font-style: normal;
+}
+
+.description {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--dim);
+  font-size: 1rem;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.voice-field {
+  display: grid;
+  width: 10rem;
+  height: 10rem;
+  place-items: center;
+}
+
+.voice-field::before {
+  position: absolute;
+  width: 80%;
+  height: 58%;
+  border-radius: 999px;
+  background: rgba(203, 166, 247, 0.2);
+  content: "";
+  filter: blur(2.5rem);
+  opacity: 0.5;
+  transform: translateY(1.5rem);
+}
+
+.voice-orb {
+  position: relative;
+  isolation: isolate;
+  width: 7.75rem;
+  height: 7.75rem;
+  border: 1px solid rgba(234, 232, 238, 0.16);
+  border-radius: 46% 54% 52% 48% / 54% 45% 55% 46%;
+  background: var(--panel);
+  box-shadow:
+    0 0 0 0.0625rem rgba(12, 12, 11, 0.5),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.42);
+  transform: rotate(-4deg);
+}
+
+/* iOS Safari does not clip blurred (filtered) children to a rounded parent via
+   overflow alone, so the square bounding box leaks through. clip-path is honored
+   for filtered descendants; keeping it on an inner layer preserves the orb's
+   border and drop shadow. */
+.voice-orb-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  clip-path: inset(0 round 46% 54% 52% 48% / 54% 45% 55% 46%);
+}
+
+.voice-color,
+.voice-sheen {
+  position: absolute;
+  pointer-events: none;
+}
+
+.voice-color {
+  border-radius: 999px;
+  filter: blur(1.125rem);
+  opacity: 0.78;
+}
+
+.voice-color-sky {
+  top: -22%;
+  left: -28%;
+  width: 105%;
+  height: 96%;
+  background: var(--teal);
+}
+
+.voice-color-violet {
+  top: -18%;
+  right: -38%;
+  width: 102%;
+  height: 112%;
+  background: var(--spot);
+}
+
+.voice-color-rose {
+  right: -24%;
+  bottom: -35%;
+  width: 102%;
+  height: 92%;
+  background: var(--red);
+}
+
+.voice-color-gold {
+  bottom: -35%;
+  left: -30%;
+  width: 96%;
+  height: 90%;
+  background: var(--yellow);
+}
+
+.voice-sheen {
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 28% 19%, rgba(255, 255, 255, 0.54), transparent 21%),
+    radial-gradient(circle at 52% 46%, transparent 30%, rgba(23, 23, 26, 0.16) 74%);
+  box-shadow: inset 0 0 1.75rem rgba(234, 232, 238, 0.08);
+}
+
+body[data-call-state="connecting"] .voice-field::before,
+body[data-call-state="connected"] .voice-field::before,
+body[data-call-state="listening"] .voice-field::before,
+body[data-call-state="speaking"] .voice-field::before {
+  opacity: 0.78;
+}
+
+body[data-call-state="connecting"] .voice-orb {
+  animation: bloom-connect 1.8s ease-in-out infinite;
+}
+
+body[data-call-state="connected"] .voice-orb,
+body[data-call-state="listening"] .voice-orb {
+  animation: bloom-listen 3.8s ease-in-out infinite;
+}
+
+body[data-call-state="speaking"] .voice-orb {
+  animation: bloom-speak 1.2s ease-in-out infinite;
+}
+
+body[data-call-state="connected"] .voice-color,
+body[data-call-state="listening"] .voice-color,
+body[data-call-state="speaking"] .voice-color {
+  opacity: 0.94;
+}
+
+body[data-call-state="connected"] .voice-color-sky,
+body[data-call-state="listening"] .voice-color-sky,
+body[data-call-state="speaking"] .voice-color-sky {
+  animation: color-drift-sky 4.8s ease-in-out infinite alternate;
+}
+
+body[data-call-state="connected"] .voice-color-violet,
+body[data-call-state="listening"] .voice-color-violet,
+body[data-call-state="speaking"] .voice-color-violet {
+  animation: color-drift-violet 4.2s -1.4s ease-in-out infinite alternate;
+}
+
+body[data-call-state="connected"] .voice-color-rose,
+body[data-call-state="listening"] .voice-color-rose,
+body[data-call-state="speaking"] .voice-color-rose {
+  animation: color-drift-rose 3.9s -0.8s ease-in-out infinite alternate;
+}
+
+.status-line {
+  display: flex;
+  min-height: 1.5rem;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  background: var(--faint);
+}
+
+.status-dot[data-state="connected"],
+.status-dot[data-state="listening"] {
+  background: var(--green);
+}
+
+.status-dot[data-state="speaking"] {
+  background: var(--spot);
+}
+
+.status-dot[data-state="connecting"] {
+  background: var(--yellow);
+}
+
+.status-dot[data-state="error"] {
+  background: var(--red);
+}
+
+.duration {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.duration::before {
+  content: "·";
+  margin-right: 0.625rem;
+}
+
+.error-message {
+  max-width: 42ch;
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--red) 38%, var(--line-strong));
+  background: color-mix(in srgb, var(--red) 8%, var(--bg));
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.start-controls,
+.call-controls {
+  display: flex;
+  align-items: center;
+}
+
+.start-controls {
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.start-controls p {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.call-controls {
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(0.5rem);
+  backdrop-filter: blur(0.5rem);
+}
+
+.button {
+  min-height: 2.875rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.button:focus-visible,
+.brand:focus-visible {
+  outline: 2px solid var(--spot);
+  outline-offset: 3px;
+}
+
+.button-primary {
+  min-width: 9.25rem;
+  border: 1px solid var(--spot);
+  background: var(--spot);
+  color: var(--spot-ink);
+}
+
+.button-primary:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.button-secondary {
+  border-right: 1px solid var(--line-strong);
+  background: transparent;
+}
+
+.button-secondary:hover {
+  color: var(--spot);
+}
+
+.button-secondary[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--spot) 12%, transparent);
+  color: var(--spot);
+}
+
+.button-danger {
+  background: transparent;
+  color: var(--red);
+}
+
+.button-danger:hover {
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
+
+@keyframes bloom-connect {
+  50% {
+    border-radius: 52% 48% 45% 55% / 47% 55% 45% 53%;
+    transform: rotate(2deg) scale(0.96);
+  }
+}
+
+@keyframes bloom-listen {
+  50% {
+    border-radius: 53% 47% 45% 55% / 48% 56% 44% 52%;
+    transform: rotate(2deg) scale(1.025);
+  }
+}
+
+@keyframes bloom-speak {
+  50% {
+    border-radius: 51% 49% 57% 43% / 45% 54% 46% 55%;
+    transform: rotate(1deg) scale(1.055);
+  }
+}
+
+@keyframes color-drift-sky {
+  to {
+    transform: translate(12%, 9%) scale(1.08);
+  }
+}
+
+@keyframes color-drift-violet {
+  to {
+    transform: translate(-13%, 10%) scale(1.1);
+  }
+}
+
+@keyframes color-drift-rose {
+  to {
+    transform: translate(-10%, -12%) scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-field::before,
+  .voice-orb,
+  .voice-color {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 40rem) {
+  .app-shell {
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .topbar {
+    height: 3.5rem;
+    padding: 0 1.25rem;
+  }
+
+  .brand {
+    font-size: 1.125rem;
+  }
+
+  .privacy-status {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+  }
+
+  .call-stage {
+    gap: 1.5rem;
+    padding: 3rem 1.25rem 4rem;
+  }
+
+  .call-stage::before {
+    top: 18%;
+    right: -14rem;
+  }
+
+  .call-stage::after {
+    bottom: -15rem;
+    left: -14rem;
+  }
+
+  .heading-group {
+    gap: 1.125rem;
+  }
+
+  h1 {
+    max-width: 10ch;
+    font-size: clamp(3rem, 15vw, 4.4rem);
+  }
+
+  .description {
+    max-width: 33ch;
+    font-size: 1rem;
+  }
+
+  .voice-field {
+    width: 8.75rem;
+    height: 8.75rem;
+  }
+
+  .voice-orb {
+    width: 7rem;
+    height: 7rem;
+  }
+
+  .button {
+    min-height: 3rem;
+    font-size: 0.75rem;
+  }
+
+  .call-controls {
+    width: 100%;
+    max-width: 18rem;
+  }
+
+  .call-controls .button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 24rem) {
+  .privacy-status {
+    gap: 0.4rem;
+    letter-spacing: 0;
+  }
+
+  .brand-mark {
+    display: none;
+  }
+}

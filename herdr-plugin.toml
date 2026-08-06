@@ -1,0 +1,39 @@
+id = "herdr-call"
+name = "Herdr Call"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Talk to and manage Herdr sessions through a private ElevenLabs voice call."
+platforms = ["macos", "linux"]
+
+[[build]]
+command = ["npm", "ci"]
+
+[[build]]
+command = ["npm", "run", "build"]
+
+[[startup]]
+command = ["node", "dist/server/main.js", "--provision-only"]
+
+[[actions]]
+id = "start"
+title = "Start voice call"
+contexts = ["workspace", "tab", "pane", "global"]
+command = [
+  "herdr",
+  "plugin",
+  "pane",
+  "open",
+  "--plugin",
+  "herdr-call",
+  "--entrypoint",
+  "call",
+  "--placement",
+  "tab",
+  "--focus",
+]
+
+[[panes]]
+id = "call"
+title = "Herdr Call"
+placement = "tab"
+command = ["node", "dist/server/main.js"]

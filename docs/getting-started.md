@@ -9,19 +9,20 @@ This guide takes you from nothing installed to talking with your Herdr session f
 - An [ElevenLabs](https://elevenlabs.io) account.
 - [Tailscale](https://tailscale.com) running on this machine and on the device you'll call from.
 
-## 2. Install the plugin
+## 2. Install and start the plugin
 
 ```bash
-herdr plugin install eliasstravik/herdr-call
+herdr plugin install eliasstravik/herdr-call &&
+herdr plugin action invoke start --plugin herdr-call
 ```
 
-The install runs `npm ci` and `npm run build` inside the plugin directory. Nothing else is downloaded or executed.
+The first command installs and builds the plugin. The second opens a **Herdr Call** tab in your
+current Herdr session.
 
 ## 3. Paste your ElevenLabs key
 
 1. Create an API key at [elevenlabs.io → API keys](https://elevenlabs.io/app/settings/api-keys) with **only the ElevenAgents write permission** — nothing else is needed; leave every other permission off.
-2. Run the **Start voice call** action in Herdr.
-3. Paste the key when the call pane asks — first run only.
+2. Paste the key when the Herdr Call tab asks — first run only.
 
 The plugin saves the key server-side (readable only by your user), provisions the voice agent and its 26 tools automatically, and never sends the key to the browser.
 
@@ -42,6 +43,35 @@ Say hello, then try:
 - *"What are my agents doing?"* — you should hear a spoken summary of your workspaces and agents.
 - *"Tell the api agent to fix the failing tests, and let me know when it's done."*
 - *"Run `git status` in the deploy pane."* — the exact command is read back to you and runs only after you say yes.
+
+## Return to Herdr Call
+
+Leave the Herdr Call tab running while you want calls available. It keeps running when you detach
+from and reattach to Herdr.
+
+If you close the tab, or just want to jump back to it, run this from any Herdr pane:
+
+```bash
+herdr plugin action invoke start --plugin herdr-call
+```
+
+The command focuses the existing Herdr Call tab when one is running and opens a new tab otherwise.
+
+For an optional keyboard shortcut, add this to Herdr's `config.toml`:
+
+```toml
+[[keys.command]]
+key = "prefix+shift+c"
+type = "plugin_action"
+command = "herdr-call.start"
+description = "Start or focus Herdr Call"
+```
+
+Reload Herdr's configuration, then press `Ctrl+B`, release, and press `Shift+C`:
+
+```bash
+herdr server reload-config
+```
 
 ## Optional configuration
 
@@ -78,6 +108,7 @@ npm run build   # produce dist/
 
 ## Troubleshooting
 
+- **The Herdr Call tab is missing:** Run `herdr plugin action invoke start --plugin herdr-call`. It focuses an existing call tab or opens one when needed.
 - **"Tailscale was not detected" in the pane:** Start Tailscale on this machine, then restart the call pane. Until then the call works on this machine only, at `http://127.0.0.1:47831`.
 - **Tailscale Serve fails with a permissions error (Linux):** Make your user the Tailscale operator with `sudo tailscale set --operator=$USER`, or run the printed manual command with `sudo`.
 - **The phone can't open the call URL:** Confirm the phone is on the same tailnet and Tailscale is connected on it.

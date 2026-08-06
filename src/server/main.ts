@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     await provisionIfConfigured(config.elevenlabsApiKey, config.voiceId);
     if (!config.elevenlabsApiKey) {
       process.stdout.write(
-        "Herdr Call setup pending: run the Start voice call action to finish setup.\n",
+        "Herdr Call setup pending: run `herdr plugin action invoke start --plugin herdr-call` to finish setup.\n",
       );
     }
     return;
@@ -118,6 +118,10 @@ async function announce(
   tailscale: ReturnType<typeof createTailscaleRunner>,
 ): Promise<void> {
   process.stdout.write(`Herdr Call is listening on http://${LOOPBACK_HOST}:${CALL_SERVER_PORT}\n`);
+  process.stdout.write(
+    "Leave this tab running while you want calls available. To return here later, run:\n" +
+      "  herdr plugin action invoke start --plugin herdr-call\n",
+  );
 
   if (settings.shouldServe) {
     const serve = await ensureServe(tailscale, CALL_SERVER_PORT);

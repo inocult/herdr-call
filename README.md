@@ -52,8 +52,8 @@ Anything that touches a terminal directly — commands, keystrokes, closing pane
 
 <table>
 <tr>
-<td align="center" valign="top" width="33%"><h3>1️⃣</h3><b>Install the plugin</b><br /><sub>Run <code>herdr plugin install eliasstravik/herdr-call</code>. The plugin builds itself on install.</sub></td>
-<td align="center" valign="top" width="33%"><h3>2️⃣</h3><b>Paste your ElevenLabs key</b><br /><sub>Run <b>Start voice call</b> in Herdr and paste your key when the pane asks — first run only. Everything else configures itself.</sub></td>
+<td align="center" valign="top" width="33%"><h3>1️⃣</h3><b>Install and start</b><br /><sub>Run <code>herdr plugin install eliasstravik/herdr-call &amp;&amp; herdr plugin action invoke start --plugin herdr-call</code>. The plugin builds itself and opens its tab.</sub></td>
+<td align="center" valign="top" width="33%"><h3>2️⃣</h3><b>Paste your ElevenLabs key</b><br /><sub>Paste your key when the Herdr Call tab asks — first run only. Everything else configures itself.</sub></td>
 <td align="center" valign="top" width="33%"><h3>3️⃣</h3><b>Call your agent</b><br /><sub>The pane prints your private call URL and a QR code. Scan it with your phone and start talking to your session.</sub></td>
 </tr>
 </table>
@@ -74,6 +74,19 @@ Anything that touches a terminal directly — commands, keystrokes, closing pane
 ### Do I need to know how to code?
 
 No. The plugin builds itself on install, and the only thing you ever type is your ElevenLabs API key, once, when the call pane asks for it. Your tailnet hostname, the HTTPS mapping, and the voice agent all configure themselves.
+
+### How do I return to the Herdr Call tab?
+
+Leave the tab running and it will survive normal Herdr detach and reattach. If you close it, or want
+to focus it again, run:
+
+```bash
+herdr plugin action invoke start --plugin herdr-call
+```
+
+The command focuses the existing tab or opens a new one. The
+[getting-started guide](docs/getting-started.md#return-to-herdr-call) also includes an optional
+`Ctrl+B`, `Shift+C` shortcut.
 
 ### What permissions does the ElevenLabs key need?
 

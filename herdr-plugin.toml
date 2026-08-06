@@ -16,21 +16,9 @@ command = ["node", "dist/server/main.js", "--provision-only"]
 
 [[actions]]
 id = "start"
-title = "Start voice call"
+title = "Start or focus voice call"
 contexts = ["workspace", "tab", "pane", "global"]
-command = [
-  "herdr",
-  "plugin",
-  "pane",
-  "open",
-  "--plugin",
-  "herdr-call",
-  "--entrypoint",
-  "call",
-  "--placement",
-  "tab",
-  "--focus",
-]
+command = ["node", "dist/server/start.js"]
 
 [[panes]]
 id = "call"

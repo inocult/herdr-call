@@ -38,8 +38,8 @@ export function createAuthPolicy(options: AuthPolicyOptions): AuthPolicy {
  *     may drive the relay from the tailnet; local loopback callers are the operator themselves.
  */
 export function authorizeRequest(policy: AuthPolicy, request: IncomingMessage): AuthResult {
-  const host = authorizeHost(policy, request);
-  if (!host.ok) return host;
+  const hostCheck = authorizeHost(policy, request);
+  if (!hostCheck.ok) return hostCheck;
 
   if (!hasValidToken(policy, request)) {
     return { ok: false, status: 401, message: "Unauthorized" };
@@ -47,7 +47,7 @@ export function authorizeRequest(policy: AuthPolicy, request: IncomingMessage): 
 
   if (policy.allowedTailnetUsers.size > 0) {
     const login = headerValue(request, "tailscale-user-login")?.toLowerCase();
-    const local = isLoopbackHost(hostnameOf(`http://${host}`));
+    const local = isLoopbackHost(requestHostname(request));
     if (login) {
       if (!policy.allowedTailnetUsers.has(login)) {
         return { ok: false, status: 403, message: "User is not allowed" };
@@ -113,6 +113,13 @@ export function tokenCookie(token: string): string {
 function headerValue(request: IncomingMessage, name: string): string | undefined {
   const value = request.headers[name];
   return Array.isArray(value) ? value[0] : value;
+}
+
+/** The hostname the client addressed us by, from the Host header. Tailscale Serve rewrites this
+ *  to the tailnet name, so a loopback value really does mean a caller on this machine. */
+function requestHostname(request: IncomingMessage): string {
+  const host = request.headers.host;
+  return hostnameOf(`http://${typeof host === "string" ? host : ""}`);
 }
 
 function hostnameOf(candidate: string): string {

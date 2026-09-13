@@ -182,6 +182,30 @@ test("configured allowed_tailnet_users blocks an unlisted tailnet identity", asy
   assert.equal(allowed.status, 200);
 });
 
+test("an allowlist still lets the operator drive the call from loopback", async () => {
+  const base = await startServer({
+    tailnetUrl: "https://host.tailnet.ts.net",
+    allowedTailnetUsers: ["alice@example.com"],
+  });
+
+  // Tailscale Serve only injects an identity header for tailnet callers, so a loopback request
+  // carries none. It is the operator at the machine and must not be turned away.
+  const loopback = await rawRequest(base, {
+    method: "POST",
+    path: "/api/session",
+    headers: { ...authHeader, Host: "127.0.0.1" },
+  });
+  assert.equal(loopback.status, 200);
+
+  // A tailnet host with no verified identity is still refused.
+  const anonymous = await rawRequest(base, {
+    method: "POST",
+    path: "/api/session",
+    headers: { ...authHeader, Host: "host.tailnet.ts.net" },
+  });
+  assert.equal(anonymous.status, 403);
+});
+
 test("GET /api/events flushes uncompressed server-sent events", async () => {
   const eventHub = new CallEventHub();
   const base = await startServer({ eventHub });

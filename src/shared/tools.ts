@@ -90,6 +90,10 @@ export const TOOL_DEFINITIONS = [
           minimum: 1,
           maximum: MAX_WAIT_SECONDS,
           default: DEFAULT_WAIT_SECONDS,
+          // ElevenLabs drops `maximum` and `default` when it converts this schema, so the bound
+          // only reaches the model if the description carries it. Without that it asks for waits
+          // the relay has to refuse.
+          description: `How long to wait, in seconds, up to ${MAX_WAIT_SECONDS}. Defaults to ${DEFAULT_WAIT_SECONDS}. Prefer a short wait and another check over one long one.`,
         },
       },
     },
@@ -215,6 +219,10 @@ export const TOOL_DEFINITIONS = [
           minimum: 1,
           maximum: MAX_WAIT_SECONDS,
           default: DEFAULT_WAIT_SECONDS,
+          // ElevenLabs drops `maximum` and `default` when it converts this schema, so the bound
+          // only reaches the model if the description carries it. Without that it asks for waits
+          // the relay has to refuse.
+          description: `How long to wait, in seconds, up to ${MAX_WAIT_SECONDS}. Defaults to ${DEFAULT_WAIT_SECONDS}. Prefer a short wait and another check over one long one.`,
         },
       },
     },

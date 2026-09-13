@@ -50,6 +50,8 @@ window.addEventListener("beforeunload", () => {
   void conversation?.endSession();
 });
 
+classifyWatermark();
+
 if (!window.isSecureContext) {
   startButton.disabled = true;
   showError("Microphone access requires HTTPS. Open this page through Tailscale Serve.");
@@ -192,6 +194,63 @@ function stopLevelMeter(): void {
   document.body.style.removeProperty("--voice-in");
   document.body.style.removeProperty("--voice-out");
   delete document.body.dataset.voice;
+}
+
+// The watermark behind the stage is whatever logo this environment serves at
+// /logo.png. Logos come as dark marks on white, light marks on dark, or marks
+// on transparency, and each needs a different filter to read as faint linework
+// on our dark ground. Sample the image once and tag the page accordingly.
+function classifyWatermark(): void {
+  const seal = document.querySelector<HTMLImageElement>(".stage-seal");
+  if (!seal) return;
+  const apply = (): void => {
+    try {
+      const size = 32;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) return;
+      context.drawImage(seal, 0, 0, size, size);
+      const { data } = context.getImageData(0, 0, size, size);
+      let opaque = 0;
+      let luminance = 0;
+      let edgeOpaque = 0;
+      let edgeLuminance = 0;
+      let edgeCount = 0;
+      for (let y = 0; y < size; y += 1) {
+        for (let x = 0; x < size; x += 1) {
+          const i = (y * size + x) * 4;
+          const alpha = (data[i + 3] ?? 0) / 255;
+          const lum = (0.2126 * (data[i] ?? 0) + 0.7152 * (data[i + 1] ?? 0) + 0.0722 * (data[i + 2] ?? 0)) / 255;
+          if (alpha > 0.5) {
+            opaque += 1;
+            luminance += lum;
+          }
+          const onEdge = x < 2 || y < 2 || x >= size - 2 || y >= size - 2;
+          if (onEdge) {
+            edgeCount += 1;
+            if (alpha > 0.5) {
+              edgeOpaque += 1;
+              edgeLuminance += lum;
+            }
+          }
+        }
+      }
+      const transparentEdges = edgeOpaque / Math.max(1, edgeCount) < 0.5;
+      const edgeIsLight = edgeOpaque > 0 && edgeLuminance / edgeOpaque > 0.6;
+      const overallLight = opaque > 0 && luminance / opaque > 0.6;
+      document.body.dataset.seal = transparentEdges
+        ? "transparent"
+        : edgeIsLight || overallLight
+          ? "dark-on-light"
+          : "light-on-dark";
+    } catch {
+      // A tainted or unreadable image keeps the default treatment.
+    }
+  };
+  if (seal.complete && seal.naturalWidth > 0) apply();
+  else seal.addEventListener("load", apply, { once: true });
 }
 
 function clamp01(value: number): number {

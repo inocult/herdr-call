@@ -39,7 +39,7 @@ key only needs the ElevenAgents write permission — create it with that single 
 At startup the plugin discovers your tailnet from `tailscale status`: the MagicDNS hostname becomes
 the call URL, your own tailnet login becomes the identity allowlist, and the tailnet-only HTTPS
 mapping is configured automatically via `tailscale serve` (equivalent to
-`tailscale serve --bg 47831`). If Tailscale is not detected, nothing is exposed — the call is
+`tailscale serve --bg --https=47831 http://127.0.0.1:47831`). If Tailscale is not detected, nothing is exposed — the call is
 reachable on loopback only.
 
 Everything can be overridden in `config.toml` (in `HERDR_PLUGIN_CONFIG_DIR`, not in this repo):

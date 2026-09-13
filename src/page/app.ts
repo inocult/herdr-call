@@ -15,6 +15,7 @@ const errorElement = element<HTMLElement>("error-message");
 let conversation: ConversationInstance | null = null;
 let eventSource: EventSource | null = null;
 let durationTimer: number | undefined;
+let levelFrame: number | undefined;
 let callStartedAt = 0;
 let muted = false;
 
@@ -96,6 +97,7 @@ async function startCall(): Promise<void> {
 
 function setConnected(): void {
   document.body.dataset.callState = "connected";
+  startLevelMeter();
   startControls.hidden = true;
   callControls.hidden = false;
   callStartedAt = Date.now();
@@ -134,6 +136,7 @@ async function endCall(): Promise<void> {
 }
 
 function setDisconnected(): void {
+  stopLevelMeter();
   conversation = null;
   eventSource?.close();
   eventSource = null;
@@ -148,6 +151,51 @@ function setDisconnected(): void {
   muteButton.textContent = "Mute";
   document.body.dataset.callState = "ready";
   setStatus("ready", "Ready");
+}
+
+// The orb follows who is actually talking, not just whose turn it is: the SDK
+// exposes smoothed microphone and playback volumes (0..1), which we ease a
+// little more and hand to CSS as custom properties plus a data-voice flag.
+const VOICE_THRESHOLD = 0.04;
+let inLevel = 0;
+let outLevel = 0;
+
+function startLevelMeter(): void {
+  stopLevelMeter();
+  const tick = (): void => {
+    const active = conversation;
+    if (!active) return;
+    const rawIn = muted ? 0 : clamp01(active.getInputVolume());
+    const rawOut = clamp01(active.getOutputVolume());
+    // Rise quickly, fall slowly, so speech reads as a glow rather than a flicker.
+    inLevel = rawIn > inLevel ? inLevel + (rawIn - inLevel) * 0.55 : inLevel * 0.86;
+    outLevel = rawOut > outLevel ? outLevel + (rawOut - outLevel) * 0.55 : outLevel * 0.86;
+    const style = document.body.style;
+    style.setProperty("--voice-in", inLevel.toFixed(3));
+    style.setProperty("--voice-out", outLevel.toFixed(3));
+    document.body.dataset.voice =
+      outLevel > VOICE_THRESHOLD && outLevel >= inLevel
+        ? "agent"
+        : inLevel > VOICE_THRESHOLD
+          ? "user"
+          : "idle";
+    levelFrame = window.requestAnimationFrame(tick);
+  };
+  levelFrame = window.requestAnimationFrame(tick);
+}
+
+function stopLevelMeter(): void {
+  if (levelFrame !== undefined) window.cancelAnimationFrame(levelFrame);
+  levelFrame = undefined;
+  inLevel = 0;
+  outLevel = 0;
+  document.body.style.removeProperty("--voice-in");
+  document.body.style.removeProperty("--voice-out");
+  delete document.body.dataset.voice;
+}
+
+function clamp01(value: number): number {
+  return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
 }
 
 function updateDuration(): void {

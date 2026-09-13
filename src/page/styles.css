@@ -296,11 +296,11 @@ h1 em {
   width: 80%;
   height: 58%;
   border-radius: 999px;
-  background: rgba(203, 166, 247, 0.2);
+  background: color-mix(in srgb, var(--voice-tint) 28%, transparent);
   content: "";
   filter: blur(2.5rem);
   opacity: 0.5;
-  transform: translateY(1.5rem);
+  transform: translateY(1.5rem) scale(calc(1 + var(--voice-level) * 0.8));
 }
 
 .voice-orb {
@@ -384,6 +384,90 @@ h1 em {
   box-shadow: inset 0 0 1.75rem rgba(234, 232, 238, 0.08);
 }
 
+:root {
+  --voice-in: 0;
+  --voice-out: 0;
+  --voice-level: max(var(--voice-in), var(--voice-out));
+  --voice-tint: var(--spot);
+}
+
+body[data-voice="user"] {
+  --voice-tint: var(--teal);
+}
+
+body[data-voice="agent"] {
+  --voice-tint: var(--spot);
+}
+
+/* A slow conic halo behind the orb. Idle it is a whisper; on a call it opens
+   with the live level and takes the speaker's colour: teal for you, violet for
+   the desk. */
+.voice-halo {
+  position: absolute;
+  width: 11.5rem;
+  height: 11.5rem;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 12%,
+    var(--voice-tint) 20%,
+    transparent 34%,
+    var(--teal) 48%,
+    transparent 60%,
+    var(--red) 72%,
+    transparent 84%,
+    var(--voice-tint) 94%,
+    transparent 100%
+  );
+  filter: blur(0.9rem);
+  opacity: 0.3;
+  transform: scale(0.9);
+  animation: halo-spin 14s linear infinite;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.voice-ring {
+  position: absolute;
+  width: 9.25rem;
+  height: 9.25rem;
+  border: 1px solid color-mix(in srgb, var(--voice-tint) 55%, transparent);
+  border-radius: 999px;
+  opacity: 0.5;
+  transform: scale(0.98);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    border-color 0.5s ease;
+}
+
+.voice-ring::after {
+  position: absolute;
+  inset: -0.75rem;
+  border: 1px solid color-mix(in srgb, var(--voice-tint) 28%, transparent);
+  border-radius: inherit;
+  content: "";
+}
+
+body[data-call-state="connecting"] .voice-halo,
+body[data-call-state="connected"] .voice-halo,
+body[data-call-state="listening"] .voice-halo,
+body[data-call-state="speaking"] .voice-halo {
+  opacity: calc(0.6 + var(--voice-level) * 0.4);
+  transform: scale(calc(1.05 + var(--voice-level) * 0.7));
+  animation-duration: calc(14s - var(--voice-level) * 9s);
+  transition: none;
+}
+
+body[data-call-state="connected"] .voice-ring,
+body[data-call-state="listening"] .voice-ring,
+body[data-call-state="speaking"] .voice-ring {
+  opacity: calc(0.7 + var(--voice-level) * 0.3);
+  transform: scale(calc(1.02 + var(--voice-level) * 0.4));
+  transition: border-color 0.5s ease;
+}
+
 body[data-call-state="connecting"] .voice-field::before,
 body[data-call-state="connected"] .voice-field::before,
 body[data-call-state="listening"] .voice-field::before,
@@ -426,6 +510,38 @@ body[data-call-state="connected"] .voice-color-rose,
 body[data-call-state="listening"] .voice-color-rose,
 body[data-call-state="speaking"] .voice-color-rose {
   animation: color-drift-rose 3.9s -0.8s ease-in-out infinite alternate;
+}
+
+/* Speaker colouring. These sit after the call-state rules on purpose: same
+   specificity, later wins, so the live speaker overrides the generic drift. */
+body[data-voice="user"] .voice-color-sky,
+body[data-voice="user"] .voice-color-gold {
+  opacity: 1;
+}
+
+body[data-voice="user"] .voice-color-violet,
+body[data-voice="user"] .voice-color-rose {
+  opacity: 0.1;
+}
+
+body[data-voice="agent"] .voice-color-violet,
+body[data-voice="agent"] .voice-color-rose {
+  opacity: 1;
+}
+
+body[data-voice="agent"] .voice-color-sky,
+body[data-voice="agent"] .voice-color-gold {
+  opacity: 0.1;
+}
+
+body[data-voice="user"] .voice-orb,
+body[data-voice="agent"] .voice-orb {
+  border-color: color-mix(in srgb, var(--voice-tint) 75%, transparent);
+  box-shadow:
+    0 0 0 0.0625rem rgba(12, 12, 11, 0.5),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.42),
+    0 0 calc(1.5rem + var(--voice-level) * 4rem) color-mix(in srgb, var(--voice-tint) 70%, transparent),
+    0 0 calc(4rem + var(--voice-level) * 8rem) color-mix(in srgb, var(--voice-tint) 30%, transparent);
 }
 
 .status-line {
@@ -595,6 +711,12 @@ body[data-call-state="speaking"] .voice-color-rose {
   border-bottom-color: var(--spot);
 }
 
+@keyframes halo-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 @keyframes bloom-connect {
   50% {
     border-radius: 52% 48% 45% 55% / 47% 55% 45% 53%;
@@ -636,6 +758,7 @@ body[data-call-state="speaking"] .voice-color-rose {
 
 @media (prefers-reduced-motion: reduce) {
   .voice-field::before,
+  .voice-halo,
   .voice-orb,
   .voice-color {
     animation: none !important;
@@ -709,6 +832,16 @@ body[data-call-state="speaking"] .voice-color-rose {
   .voice-orb {
     width: 7rem;
     height: 7rem;
+  }
+
+  .voice-halo {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  .voice-ring {
+    width: 8.25rem;
+    height: 8.25rem;
   }
 
   .button {

@@ -22,7 +22,9 @@ import {
 
 export const LOOPBACK_HOST = "127.0.0.1";
 export const CALL_SERVER_PORT = 47_831;
-export const HERDR_PROTOCOL = 19;
+// Herdr 0.8.0 spoke protocol 19; 0.8.2 bumped it to 20 without removing any method
+// this plugin calls, so accept both rather than pinning one exact number.
+export const HERDR_PROTOCOLS = new Set([19, 20]);
 
 async function main(): Promise<void> {
   const configDirectory = requiredEnvironment("HERDR_PLUGIN_CONFIG_DIR");
@@ -45,8 +47,10 @@ async function main(): Promise<void> {
     process.env.HERDR_SOCKET_PATH ?? join(homedir(), ".config", "herdr", "herdr.sock");
   const herdr = new HerdrClient({ socketPath });
   const ping = asRecord(await herdr.request("ping", {}));
-  if (ping.type !== "pong" || ping.protocol !== HERDR_PROTOCOL) {
-    throw new Error(`Unsupported Herdr socket protocol: expected ${HERDR_PROTOCOL}`);
+  if (ping.type !== "pong" || !HERDR_PROTOCOLS.has(Number(ping.protocol))) {
+    throw new Error(
+      `Unsupported Herdr socket protocol ${String(ping.protocol)}: expected one of ${[...HERDR_PROTOCOLS].join(", ")}`,
+    );
   }
 
   const tailscale = createTailscaleRunner();

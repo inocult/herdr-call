@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import { provisionElevenLabsAgent, toElevenLabsParameters } from "../src/server/provision.js";
-import { TOOL_DEFINITIONS } from "../src/shared/tools.js";
+import { TOOL_DEFINITIONS, type VoiceToolDefinition } from "../src/shared/tools.js";
+
+const TOOLS: readonly VoiceToolDefinition[] = TOOL_DEFINITIONS;
 
 interface RecordedRequest {
   url: string;
@@ -89,7 +91,7 @@ test("provisioning creates private client tools and the exact configured agent",
 
   assert.equal(result.agentId, "agent_created");
   assert.equal(requests.length, TOOL_DEFINITIONS.length + 1);
-  for (const [index, definition] of TOOL_DEFINITIONS.entries()) {
+  for (const [index, definition] of TOOLS.entries()) {
     const request = requests[index];
     assert.equal(request?.url, "https://api.elevenlabs.io/v1/convai/tools");
     assert.equal(request?.method, "POST");
@@ -101,6 +103,9 @@ test("provisioning creates private client tools and the exact configured agent",
         description: definition.description,
         parameters: toElevenLabsParameters(definition.parameters),
         expects_response: true,
+        ...(definition.responseTimeoutSeconds
+          ? { response_timeout_secs: definition.responseTimeoutSeconds }
+          : {}),
       },
     });
   }

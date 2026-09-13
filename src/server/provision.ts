@@ -2,7 +2,15 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { TOOL_DEFINITIONS, type JsonSchema } from "../shared/tools.js";
+import {
+  TOOL_DEFINITIONS,
+  type JsonSchema,
+  type VoiceToolDefinition,
+} from "../shared/tools.js";
+
+/** `TOOL_DEFINITIONS` is `as const`, so each entry narrows to its own literal type and optional
+ *  fields are absent from the ones that omit them. Read it through the interface instead. */
+const TOOLS: readonly VoiceToolDefinition[] = TOOL_DEFINITIONS;
 
 const API_ROOT = "https://api.elevenlabs.io/v1/convai";
 const STATE_FILE = "provisioning.json";
@@ -48,7 +56,7 @@ export async function provisionElevenLabsAgent(
 
   const request = createApiRequester(options.apiKey, options.fetch ?? globalThis.fetch);
   const toolIds: Record<string, string> = {};
-  for (const definition of TOOL_DEFINITIONS) {
+  for (const definition of TOOLS) {
     const body = {
       tool_config: {
         type: "client",
@@ -56,6 +64,9 @@ export async function provisionElevenLabsAgent(
         description: definition.description,
         parameters: toElevenLabsParameters(definition.parameters),
         expects_response: true,
+        ...(definition.responseTimeoutSeconds
+          ? { response_timeout_secs: definition.responseTimeoutSeconds }
+          : {}),
       },
     };
     const existingId = previous?.toolIds[definition.name];
@@ -77,7 +88,7 @@ export async function provisionElevenLabsAgent(
         prompt: {
           prompt,
           llm: ELEVENLABS_LLM,
-          tool_ids: TOOL_DEFINITIONS.map((definition) => toolIds[definition.name]),
+          tool_ids: TOOLS.map((definition) => toolIds[definition.name]),
         },
       },
       tts: { voice_id: voiceId },
@@ -165,12 +176,15 @@ function provisioningStamp(pluginVersion: string, prompt: string, voiceId: strin
         voiceId,
         llm: ELEVENLABS_LLM,
         firstMessage: ELEVENLABS_FIRST_MESSAGE,
-        tools: TOOL_DEFINITIONS.map(({ name, description, parameters, guarded }) => ({
-          name,
-          description,
-          parameters,
-          guarded,
-        })),
+        tools: TOOLS.map(
+          ({ name, description, parameters, guarded, responseTimeoutSeconds }) => ({
+            name,
+            description,
+            parameters,
+            guarded,
+            responseTimeoutSeconds,
+          }),
+        ),
       }),
     )
     .digest("hex");

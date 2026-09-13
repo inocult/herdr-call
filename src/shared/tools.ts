@@ -6,7 +6,25 @@ export interface VoiceToolDefinition {
   parameters: JsonSchema;
   guarded: boolean;
   socketMapping: string | readonly string[] | null;
+  /** Seconds ElevenLabs should wait for this client tool before abandoning the call. Omitted
+   *  means their 20s default, which suits every tool that answers from a single socket round-trip. */
+  responseTimeoutSeconds?: number;
 }
+
+/**
+ * ElevenLabs abandons a client tool once `response_timeout_secs` elapses and the agent then tells
+ * the caller it hit a server error, mid-conversation. Their ceiling is 120s, so a tool that waits
+ * has to keep its own wait, the socket deadline, and the declared budget in that order:
+ *
+ *   wait (<= 90s)  <  socket deadline (wait + 5s)  <  declared budget (110s)  <  ElevenLabs cap (120s)
+ *
+ * That ordering means a wait that runs long fails as a real "timed out waiting" answer the agent can
+ * speak, instead of a silent abort. The default is deliberately well under the ceiling: a voice call
+ * should not sit in dead air for a minute before saying anything.
+ */
+export const MAX_WAIT_SECONDS = 90;
+export const DEFAULT_WAIT_SECONDS = 30;
+export const WAIT_RESPONSE_TIMEOUT_SECONDS = 110;
 
 export const TOOL_DEFINITIONS = [
   {
@@ -67,10 +85,16 @@ export const TOOL_DEFINITIONS = [
           items: { type: "string", enum: ["idle", "working", "blocked", "done", "unknown"] },
           default: ["idle", "blocked", "done"],
         },
-        timeout_seconds: { type: "integer", minimum: 1, maximum: 300, default: 60 },
+        timeout_seconds: {
+          type: "integer",
+          minimum: 1,
+          maximum: MAX_WAIT_SECONDS,
+          default: DEFAULT_WAIT_SECONDS,
+        },
       },
     },
     guarded: false,
+    responseTimeoutSeconds: WAIT_RESPONSE_TIMEOUT_SECONDS,
     socketMapping: "agent.wait",
   },
   {
@@ -186,10 +210,16 @@ export const TOOL_DEFINITIONS = [
         text: { type: "string", minLength: 1, maxLength: 200, description: "Literal substring to wait for; this is not a regular expression." },
         source: { type: "string", enum: ["visible", "recent", "recent_unwrapped", "detection"], default: "recent_unwrapped" },
         lines: { type: "integer", minimum: 1, maximum: 100, default: 50 },
-        timeout_seconds: { type: "integer", minimum: 1, maximum: 300, default: 60 },
+        timeout_seconds: {
+          type: "integer",
+          minimum: 1,
+          maximum: MAX_WAIT_SECONDS,
+          default: DEFAULT_WAIT_SECONDS,
+        },
       },
     },
     guarded: false,
+    responseTimeoutSeconds: WAIT_RESPONSE_TIMEOUT_SECONDS,
     socketMapping: "pane.wait_for_output",
   },
   {

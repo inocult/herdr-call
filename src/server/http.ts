@@ -181,6 +181,7 @@ function staticAsset(url: string | undefined): { file: string; contentType: stri
     "/index.html": { file: "index.html", contentType: "text/html; charset=utf-8" },
     "/app.js": { file: "app.js", contentType: "text/javascript; charset=utf-8" },
     "/styles.css": { file: "styles.css", contentType: "text/css; charset=utf-8" },
+    "/logo.png": { file: "logo.png", contentType: "image/png" },
   };
   return assets[pathname];
 }

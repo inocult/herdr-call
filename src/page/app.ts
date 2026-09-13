@@ -83,7 +83,7 @@ async function startCall(): Promise<void> {
       onError: (message) => showError(message),
       onModeChange: ({ mode }) => {
         document.body.dataset.callState = mode;
-        setStatus(mode, mode === "speaking" ? "Agent speaking" : muted ? "Microphone muted" : "Listening");
+        setStatus(mode, mode === "speaking" ? "Desk speaking" : muted ? "Microphone muted" : "Listening");
       },
     });
   } catch (error) {

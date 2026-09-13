@@ -50,4 +50,5 @@ await Promise.all([
   writeFile(join(outputDirectory, "page", "index.html"), builtIndex, "utf8"),
   writeFile(join(outputDirectory, "page", "styles.css"), stylesSource, "utf8"),
   copyFile(join(repositoryRoot, "src", "agent", "prompt.md"), join(outputDirectory, "agent", "prompt.md")),
+  copyFile(join(repositoryRoot, "src", "page", "logo.png"), join(outputDirectory, "page", "logo.png")),
 ]);

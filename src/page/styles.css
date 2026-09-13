@@ -81,7 +81,7 @@ button:disabled {
   display: grid;
   width: min(100%, 90rem);
   min-height: 100svh;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   margin: 0 auto;
   border-right: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line-strong);
@@ -111,12 +111,29 @@ button:disabled {
   text-decoration: none;
 }
 
-.brand-mark {
-  color: var(--spot);
+.brand-seal {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 0.1875rem rgba(203, 166, 247, 0.12);
+}
+
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.brand-sub {
+  color: var(--faint);
   font-family: var(--mono);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: -0.1em;
+  font-size: 0.5625rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 .privacy-status {
@@ -182,6 +199,30 @@ button:disabled {
   transform: rotate(45deg);
 }
 
+.stage-seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(44rem, 120vw);
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  /* contrast(2) after the invert snaps the near-black field to true black so
+     the screen blend leaves no faint square around the linework. */
+  filter: invert(1) contrast(2);
+  mix-blend-mode: screen;
+  opacity: 0.055;
+  transform: translate(-50%, -50%);
+  transition: opacity 1.2s ease;
+}
+
+body[data-call-state="connecting"] .stage-seal,
+body[data-call-state="connected"] .stage-seal,
+body[data-call-state="listening"] .stage-seal,
+body[data-call-state="speaking"] .stage-seal {
+  opacity: 0.09;
+}
+
 .heading-group,
 .voice-field,
 .status-line,
@@ -218,7 +259,7 @@ button:disabled {
 }
 
 h1 {
-  max-width: 14ch;
+  max-width: 16ch;
   margin: 0;
   color: var(--ink);
   font-family: var(--display);
@@ -528,6 +569,32 @@ body[data-call-state="speaking"] .voice-color-rose {
   background: color-mix(in srgb, var(--red) 10%, transparent);
 }
 
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 1rem 2.125rem;
+  border-top: 1px solid var(--line-strong);
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footer a {
+  color: var(--dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.footer a:hover {
+  color: var(--spot);
+  border-bottom-color: var(--spot);
+}
+
 @keyframes bloom-connect {
   50% {
     border-radius: 52% 48% 45% 55% / 47% 55% 45% 53%;
@@ -590,6 +657,16 @@ body[data-call-state="speaking"] .voice-color-rose {
     font-size: 1.125rem;
   }
 
+  .brand-seal {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .footer {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.5625rem;
+  }
+
   .privacy-status {
     font-size: 0.625rem;
     letter-spacing: 0.08em;
@@ -615,7 +692,7 @@ body[data-call-state="speaking"] .voice-color-rose {
   }
 
   h1 {
-    max-width: 10ch;
+    max-width: 12ch;
     font-size: clamp(3rem, 15vw, 4.4rem);
   }
 
@@ -655,7 +732,7 @@ body[data-call-state="speaking"] .voice-color-rose {
     letter-spacing: 0;
   }
 
-  .brand-mark {
+  .brand-sub {
     display: none;
   }
 }

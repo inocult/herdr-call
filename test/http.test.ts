@@ -223,3 +223,17 @@ test("GET / serves the page with the token injected and a strict cookie", async 
   assert.match(cookie, /herdr_call_token=/);
   assert.match(cookie, /SameSite=Strict/i);
 });
+
+test("GET /logo.png serves the At Bryde Ud seal as a cacheable PNG", async () => {
+  const { join } = await import("node:path");
+  const assetsDirectory = join(process.cwd(), "src", "page");
+  const base = await startServer({ assetsDirectory });
+
+  const response = await fetch(`${base}/logo.png`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "image/png");
+  assert.match(response.headers.get("cache-control") ?? "", /max-age=3600/);
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  // PNG signature: 89 50 4E 47
+  assert.deepEqual([...bytes.slice(0, 4)], [0x89, 0x50, 0x4e, 0x47]);
+});

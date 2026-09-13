@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#17171a" />
     <meta name="herdr-call-token" content="__HERDR_CALL_TOKEN__" />
-    <title>Herdr Call</title>
+    <title>At Bryde Ud · Voice line</title>
+    <link rel="icon" type="image/png" href="/logo.png?v=__ASSET_VERSION__" />
+    <link rel="apple-touch-icon" href="/logo.png?v=__ASSET_VERSION__" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,22 +19,29 @@
   <body>
     <main id="app" class="app-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="herdr-call home">
-          <span class="brand-mark" aria-hidden="true">❯_</span>
-          <span>herdr-call</span>
+        <a class="brand" href="/" aria-label="At Bryde Ud voice line home">
+          <img class="brand-seal" src="/logo.png?v=__ASSET_VERSION__" alt="" width="32" height="32" />
+          <span class="brand-name">
+            <span>At Bryde Ud</span>
+            <span class="brand-sub">Voice line</span>
+          </span>
         </a>
         <div class="privacy-status">
           <span class="privacy-dot" aria-hidden="true"></span>
-          Private connection
+          Private tailnet
         </div>
       </header>
 
       <section class="call-stage" aria-labelledby="call-title">
+        <img class="stage-seal" src="/logo.png?v=__ASSET_VERSION__" alt="" aria-hidden="true" />
+
         <div class="heading-group">
-          <p class="eyebrow"><span aria-hidden="true"></span>Voice plugin</p>
-          <h1 id="call-title">Talk to <em>your agents.</em></h1>
+          <p class="eyebrow"><span aria-hidden="true"></span>At Bryde Ud Ltd.</p>
+          <h1 id="call-title">The desk is <em>on the line.</em></h1>
           <p id="call-description" class="description">
-            Check progress, give direction, and keep work moving—hands free.
+            A direct voice line into the At Bryde Ud workshop. Ask what the agents are up to,
+            unblock the one that is waiting on you, or hand out the next job. From the walk, the
+            car, or the sofa.
           </p>
         </div>
 
@@ -57,17 +66,26 @@
         <p id="error-message" class="error-message" role="alert" hidden></p>
 
         <div id="start-controls" class="start-controls">
-          <button id="start-call" class="button button-primary" type="button">Start call</button>
-          <p>Microphone access is requested once. Audio connects directly to ElevenLabs.</p>
+          <button id="start-call" class="button button-primary" type="button">Call the desk</button>
+          <p>
+            Microphone access is requested once. Audio goes straight to ElevenLabs; everything else
+            stays inside the At Bryde Ud tailnet.
+          </p>
         </div>
 
         <div id="call-controls" class="call-controls" hidden>
           <button id="mute-call" class="button button-secondary" type="button" aria-pressed="false">
             Mute
           </button>
-          <button id="end-call" class="button button-danger" type="button">End call</button>
+          <button id="end-call" class="button button-danger" type="button">Hang up</button>
         </div>
       </section>
+
+      <footer class="footer">
+        <span>At Bryde Ud Ltd. · Cayman Islands</span>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <span>Built on <a href="https://github.com/eliasstravik/herdr-call">Herdr Call</a></span>
+      </footer>
     </main>
     <script type="module" src="/app.js?v=__ASSET_VERSION__"></script>
   </body>

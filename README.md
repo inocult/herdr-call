@@ -1,3 +1,13 @@
+<p align="center"><img src="https://avatars.githubusercontent.com/u/1752657?s=200&v=4" width="96" alt="At Bryde Ud Ltd. seal" /></p>
+
+<h2 align="center">Herdr Call · At Bryde Ud Ltd. edition</h2>
+
+<p align="center">The voice line into the At Bryde Ud workshop. This is a fork of <a href="https://github.com/eliasstravik/herdr-call">eliasstravik/herdr-call</a> that rebrands the call page and operator for At Bryde Ud Ltd. and is otherwise kept close to upstream so it can rebase onto it.</p>
+
+<p align="center"><sub>Fork changes live in <code>src/page/</code>, <code>src/agent/prompt.md</code>, and this banner. Sync with <code>git fetch upstream && git rebase upstream/main</code>.</sub></p>
+
+<hr />
+
 <p align="center"><img src="https://img.shields.io/badge/Herdr%20Call-Voice%20control%20for%20Herdr-2ea44f?style=flat-square&labelColor=24292f" alt="Herdr Call — Voice control for Herdr" /></p>
 
 <h3 align="center">Stay on top of your coding agents without being glued to the desk or squinting at a terminal on your phone</h3>

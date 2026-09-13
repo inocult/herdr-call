@@ -2,17 +2,17 @@
   "name": "herdr-call",
   "version": "0.1.0",
   "private": true,
-  "description": "Voice control for Herdr",
+  "description": "Voice control for Herdr, At Bryde Ud Ltd. edition",
   "type": "module",
   "license": "MIT",
   "author": "Elias Stravik",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eliasstravik/herdr-call.git"
+    "url": "git+https://github.com/inocult/herdr-call.git"
   },
-  "homepage": "https://github.com/eliasstravik/herdr-call#readme",
+  "homepage": "https://github.com/inocult/herdr-call#readme",
   "bugs": {
-    "url": "https://github.com/eliasstravik/herdr-call/issues"
+    "url": "https://github.com/inocult/herdr-call/issues"
   },
   "engines": {
     "node": ">=20"

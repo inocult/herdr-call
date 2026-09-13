@@ -37,6 +37,16 @@ test("saveApiKey creates config.toml when none exists", async () => {
   assert.equal(config.elevenlabsApiKey, "sk_fresh");
 });
 
+test("brand_* keys are read for the call page", async () => {
+  const directory = await configDirectoryWith(
+    'brand_name = "Studio 3"\nbrand_tagline = "Control room"\nbrand_logo = "~/logos/studio3.svg"\n',
+  );
+  const config = await loadPluginConfig(directory);
+  assert.equal(config.brandName, "Studio 3");
+  assert.equal(config.brandTagline, "Control room");
+  assert.equal(config.brandLogo, "~/logos/studio3.svg");
+});
+
 test("saveApiKey preserves the other keys already in config.toml", async () => {
   const directory = await configDirectoryWith('voice_id = "voice-1"\nauto_serve = false\n');
   await saveApiKey(directory, "sk_added");

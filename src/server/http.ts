@@ -12,6 +12,17 @@ export interface SessionProvider {
   createSession(): Promise<{ conversationToken: string; conversationId: string }>;
 }
 
+/** What the call page shows for this environment: the name in the header and
+ *  eyebrow, a short tagline under it, and the logo served at /logo.png. */
+export interface PageBrand {
+  name: string;
+  tagline: string;
+  /** Absolute path of an image to serve instead of the bundled logo. */
+  logoPath?: string;
+}
+
+export const DEFAULT_BRAND: PageBrand = { name: "Herdr", tagline: "Voice line" };
+
 export interface CallServerOptions {
   relay: RelayHandler;
   sessionProvider: SessionProvider;
@@ -20,9 +31,12 @@ export interface CallServerOptions {
   assetsDirectory?: string;
   tailnetUrl?: string;
   allowedTailnetUsers?: readonly string[];
+  brand?: PageBrand;
 }
 
 const TOKEN_PLACEHOLDER = "__HERDR_CALL_TOKEN__";
+const BRAND_NAME_PLACEHOLDER = "__BRAND_NAME__";
+const BRAND_TAGLINE_PLACEHOLDER = "__BRAND_TAGLINE__";
 
 export class CallEventHub {
   readonly #clients = new Set<ServerResponse>();
@@ -104,14 +118,20 @@ export function createCallServer(options: CallServerOptions): Server {
       if (request.method === "GET" && options.assetsDirectory) {
         const asset = staticAsset(request.url);
         if (asset) {
-          const rawContents = await readFile(join(options.assetsDirectory, asset.file));
+          const logoOverride = asset.file === "logo.png" ? options.brand?.logoPath : undefined;
+          const rawContents = await readFile(logoOverride ?? join(options.assetsDirectory, asset.file));
           const headers: Record<string, string> = {
-            "Content-Type": asset.contentType,
+            "Content-Type": logoOverride ? imageContentType(logoOverride) : asset.contentType,
             "Cache-Control": asset.file === "index.html" ? "no-store" : "public, max-age=3600",
           };
           if (asset.file === "index.html") {
             headers["Set-Cookie"] = tokenCookie(options.authToken);
-            const html = rawContents.toString("utf8").replaceAll(TOKEN_PLACEHOLDER, options.authToken);
+            const brand = options.brand ?? DEFAULT_BRAND;
+            const html = rawContents
+              .toString("utf8")
+              .replaceAll(TOKEN_PLACEHOLDER, options.authToken)
+              .replaceAll(BRAND_NAME_PLACEHOLDER, escapeHtml(brand.name))
+              .replaceAll(BRAND_TAGLINE_PLACEHOLDER, escapeHtml(brand.tagline));
             response.writeHead(200, headers);
             response.end(html);
             return;
@@ -172,6 +192,27 @@ function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function imageContentType(path: string): string {
+  const extension = path.toLowerCase().split(".").pop() ?? "";
+  const types: Record<string, string> = {
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+    gif: "image/gif",
+  };
+  return types[extension] ?? "application/octet-stream";
 }
 
 function staticAsset(url: string | undefined): { file: string; contentType: string } | undefined {

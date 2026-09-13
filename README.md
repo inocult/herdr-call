@@ -4,7 +4,19 @@
 
 <p align="center">The voice line into the At Bryde Ud workshop. This is a fork of <a href="https://github.com/eliasstravik/herdr-call">eliasstravik/herdr-call</a> that rebrands the call page and operator for At Bryde Ud Ltd. and is otherwise kept close to upstream so it can rebase onto it.</p>
 
-<p align="center"><sub>Fork changes live in <code>src/page/</code>, <code>src/agent/prompt.md</code>, and this banner. Sync with <code>git fetch upstream && git rebase upstream/main</code>.</sub></p>
+<p align="center"><sub>Fork changes live in <code>src/page/</code>, <code>src/agent/prompt.md</code>, the brand plumbing in <code>src/server/</code>, and this banner. Sync with <code>git fetch upstream && git rebase upstream/main</code>.</sub></p>
+
+### Branding an environment
+
+Each machine names itself in the plugin config directory (`herdr plugin config-dir herdr-call`):
+
+```toml
+brand_name = "At Bryde Ud"      # header, eyebrow, page title, footer
+brand_tagline = "Voice line"    # small line under the name
+brand_logo = "~/logos/seal.png" # optional; otherwise logo.png / logo.svg / logo.jpg next to config.toml
+```
+
+The logo is served at `/logo.png` and used as the header mark, favicon, and the faint emblem behind the call stage. Anything unset falls back to "Herdr" and the bundled seal. Restart the call pane after changing these.
 
 <hr />
 

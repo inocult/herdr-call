@@ -224,7 +224,42 @@ test("GET / serves the page with the token injected and a strict cookie", async 
   assert.match(cookie, /SameSite=Strict/i);
 });
 
-test("GET /logo.png serves the At Bryde Ud seal as a cacheable PNG", async () => {
+test("GET / injects the environment brand, escaped, and defaults to Herdr", async () => {
+  const { join } = await import("node:path");
+  const assetsDirectory = join(process.cwd(), "src", "page");
+
+  const plain = await (await fetch(`${await startServer({ assetsDirectory })}/`)).text();
+  assert.match(plain, /<title>Herdr · Voice line<\/title>/);
+  assert.doesNotMatch(plain, /__BRAND_/);
+
+  const branded = await startServer({
+    assetsDirectory,
+    brand: { name: 'Ubqty <"&>', tagline: "Ops desk" },
+  });
+  const html = await (await fetch(`${branded}/`)).text();
+  assert.match(html, /<title>Ubqty &lt;&quot;&amp;&gt; · Ops desk<\/title>/);
+  assert.doesNotMatch(html, /Ubqty <"&>/);
+});
+
+test("GET /logo.png serves the configured logo file with its own content type", async () => {
+  const { join } = await import("node:path");
+  const { mkdtemp, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const directory = await mkdtemp(join(tmpdir(), "herdr-call-brand-"));
+  const logoPath = join(directory, "logo.svg");
+  await writeFile(logoPath, "<svg xmlns='http://www.w3.org/2000/svg'/>", "utf8");
+  const base = await startServer({
+    assetsDirectory: join(process.cwd(), "src", "page"),
+    brand: { name: "Tag", tagline: "Voice line", logoPath },
+  });
+
+  const response = await fetch(`${base}/logo.png`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "image/svg+xml");
+  assert.match(await response.text(), /<svg/);
+});
+
+test("GET /logo.png serves the bundled logo as a cacheable PNG", async () => {
   const { join } = await import("node:path");
   const assetsDirectory = join(process.cwd(), "src", "page");
   const base = await startServer({ assetsDirectory });

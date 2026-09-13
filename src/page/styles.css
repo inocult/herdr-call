@@ -169,9 +169,9 @@ button:disabled {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.625rem;
+  gap: 1.5rem;
   overflow: hidden;
-  padding: 4.5rem 2.125rem 5.5rem;
+  padding: 3rem 2.125rem 4rem;
   text-align: center;
 }
 
@@ -225,7 +225,6 @@ body[data-call-state="speaking"] .stage-seal {
 
 .heading-group,
 .voice-field,
-.status-line,
 .error-message,
 .start-controls,
 .call-controls {
@@ -263,11 +262,16 @@ h1 {
   margin: 0;
   color: var(--ink);
   font-family: var(--display);
-  font-size: clamp(3.25rem, 7.2vw, 6.75rem);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 900;
-  letter-spacing: -0.055em;
-  line-height: 0.88;
+  letter-spacing: -0.05em;
+  line-height: 0.92;
   text-wrap: balance;
+}
+
+h1 .line {
+  display: block;
+  white-space: nowrap;
 }
 
 h1 em {
@@ -276,18 +280,44 @@ h1 em {
 }
 
 .description {
-  max-width: 46ch;
+  max-width: 44ch;
   margin: 0;
   color: var(--dim);
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.9375rem;
+  line-height: 1.65;
   text-wrap: pretty;
 }
 
+/* ---- The orb -------------------------------------------------------------
+   A glass sphere with an aurora inside. Four soft colour masses drift under a
+   specular sheen; a halo, a hairline ring and three orbiting sparks sit
+   behind it. On a call everything follows the live level, and the speaker
+   sets the tint: mint when the caller talks, orchid when the desk answers. */
+:root {
+  --voice-in: 0;
+  --voice-out: 0;
+  --voice-level: max(var(--voice-in), var(--voice-out));
+  --o-ice: #8ec5ff;
+  --o-mint: #8ff0c8;
+  --o-orchid: #d8a4ff;
+  --o-magenta: #ff8fd0;
+  --o-amber: #ffc272;
+  --voice-tint: var(--o-orchid);
+}
+
+body[data-voice="user"] {
+  --voice-tint: var(--o-mint);
+}
+
+body[data-voice="agent"] {
+  --voice-tint: var(--o-orchid);
+}
+
 .voice-field {
+  position: relative;
   display: grid;
-  width: 10rem;
-  height: 10rem;
+  width: 11rem;
+  height: 11rem;
   place-items: center;
 }
 
@@ -296,131 +326,32 @@ h1 em {
   width: 80%;
   height: 58%;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--voice-tint) 28%, transparent);
+  background: color-mix(in srgb, var(--voice-tint) 30%, transparent);
   content: "";
   filter: blur(2.5rem);
-  opacity: 0.5;
+  opacity: 0.45;
   transform: translateY(1.5rem) scale(calc(1 + var(--voice-level) * 0.8));
 }
 
-.voice-orb {
-  position: relative;
-  isolation: isolate;
-  width: 7.75rem;
-  height: 7.75rem;
-  border: 1px solid rgba(234, 232, 238, 0.16);
-  border-radius: 46% 54% 52% 48% / 54% 45% 55% 46%;
-  background: var(--panel);
-  box-shadow:
-    0 0 0 0.0625rem rgba(12, 12, 11, 0.5),
-    0 1.5rem 4rem rgba(0, 0, 0, 0.42);
-  transform: rotate(-4deg);
-}
-
-/* iOS Safari does not clip blurred (filtered) children to a rounded parent via
-   overflow alone, so the square bounding box leaks through. clip-path is honored
-   for filtered descendants; keeping it on an inner layer preserves the orb's
-   border and drop shadow. */
-.voice-orb-fill {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  clip-path: inset(0 round 46% 54% 52% 48% / 54% 45% 55% 46%);
-}
-
-.voice-color,
-.voice-sheen {
-  position: absolute;
-  pointer-events: none;
-}
-
-.voice-color {
-  border-radius: 999px;
-  filter: blur(1.125rem);
-  opacity: 0.78;
-}
-
-.voice-color-sky {
-  top: -22%;
-  left: -28%;
-  width: 105%;
-  height: 96%;
-  background: var(--teal);
-}
-
-.voice-color-violet {
-  top: -18%;
-  right: -38%;
-  width: 102%;
-  height: 112%;
-  background: var(--spot);
-}
-
-.voice-color-rose {
-  right: -24%;
-  bottom: -35%;
-  width: 102%;
-  height: 92%;
-  background: var(--red);
-}
-
-.voice-color-gold {
-  bottom: -35%;
-  left: -30%;
-  width: 96%;
-  height: 90%;
-  background: var(--yellow);
-}
-
-.voice-sheen {
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 28% 19%, rgba(255, 255, 255, 0.54), transparent 21%),
-    radial-gradient(circle at 52% 46%, transparent 30%, rgba(23, 23, 26, 0.16) 74%);
-  box-shadow: inset 0 0 1.75rem rgba(234, 232, 238, 0.08);
-}
-
-:root {
-  --voice-in: 0;
-  --voice-out: 0;
-  --voice-level: max(var(--voice-in), var(--voice-out));
-  --voice-tint: var(--spot);
-}
-
-body[data-voice="user"] {
-  --voice-tint: var(--teal);
-}
-
-body[data-voice="agent"] {
-  --voice-tint: var(--spot);
-}
-
-/* A slow conic halo behind the orb. Idle it is a whisper; on a call it opens
-   with the live level and takes the speaker's colour: teal for you, violet for
-   the desk. */
 .voice-halo {
   position: absolute;
-  width: 11.5rem;
-  height: 11.5rem;
+  width: 11rem;
+  height: 11rem;
   border-radius: 999px;
   background: conic-gradient(
     from 0deg,
-    transparent 0 12%,
+    transparent 0 10%,
     var(--voice-tint) 20%,
-    transparent 34%,
-    var(--teal) 48%,
-    transparent 60%,
-    var(--red) 72%,
-    transparent 84%,
-    var(--voice-tint) 94%,
+    transparent 32%,
+    var(--o-ice) 46%,
+    transparent 58%,
+    var(--o-amber) 70%,
+    transparent 82%,
+    var(--voice-tint) 93%,
     transparent 100%
   );
   filter: blur(0.9rem);
-  opacity: 0.3;
+  opacity: 0.28;
   transform: scale(0.9);
   animation: halo-spin 14s linear infinite;
   transition:
@@ -430,12 +361,11 @@ body[data-voice="agent"] {
 
 .voice-ring {
   position: absolute;
-  width: 9.25rem;
-  height: 9.25rem;
-  border: 1px solid color-mix(in srgb, var(--voice-tint) 55%, transparent);
+  width: 9rem;
+  height: 9rem;
+  border: 1px solid color-mix(in srgb, var(--voice-tint) 50%, transparent);
   border-radius: 999px;
   opacity: 0.5;
-  transform: scale(0.98);
   transition:
     opacity 0.5s ease,
     transform 0.5s ease,
@@ -445,9 +375,163 @@ body[data-voice="agent"] {
 .voice-ring::after {
   position: absolute;
   inset: -0.75rem;
-  border: 1px solid color-mix(in srgb, var(--voice-tint) 28%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--voice-tint) 22%, transparent);
   border-radius: inherit;
   content: "";
+}
+
+.voice-sparks,
+.voice-sparks span {
+  position: absolute;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.voice-sparks span {
+  inset: 0;
+  animation: halo-spin 11s linear infinite;
+  opacity: 0.55;
+  transition: opacity 0.5s ease;
+}
+
+.voice-sparks span:nth-child(2) {
+  animation-duration: 17s;
+  animation-direction: reverse;
+  animation-delay: -4s;
+  scale: 1.12;
+}
+
+.voice-sparks span:nth-child(3) {
+  animation-duration: 23s;
+  animation-delay: -9s;
+  scale: 0.88;
+}
+
+.voice-sparks span::before {
+  position: absolute;
+  top: -0.125rem;
+  left: calc(50% - 0.125rem);
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--voice-tint);
+  box-shadow:
+    0 0 0.5rem var(--voice-tint),
+    0 0 1rem color-mix(in srgb, var(--voice-tint) 60%, transparent);
+  content: "";
+}
+
+.voice-orb {
+  position: relative;
+  isolation: isolate;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 45%, #1c1b26 0%, #0d0d13 72%);
+  box-shadow:
+    inset 0 -1.75rem 2.5rem rgba(0, 0, 0, 0.6),
+    inset 0 0.125rem 0.75rem rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.5),
+    0 0 calc(1rem + var(--voice-level) * 4rem) color-mix(in srgb, var(--voice-tint) 45%, transparent);
+  animation: orb-breathe 6s ease-in-out infinite;
+  transition: box-shadow 0.4s ease;
+}
+
+/* iOS Safari does not clip blurred children to a rounded parent via overflow
+   alone; clip-path on an inner layer does the job and keeps the rim intact. */
+.voice-orb-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  clip-path: inset(0 round 999px);
+}
+
+.voice-color,
+.voice-core,
+.voice-sheen {
+  position: absolute;
+  pointer-events: none;
+}
+
+.voice-color {
+  border-radius: 999px;
+  filter: blur(1.2rem);
+  opacity: 0.7;
+  transition: opacity 0.5s ease;
+}
+
+.voice-color-sky {
+  top: -24%;
+  left: -28%;
+  width: 100%;
+  height: 92%;
+  background: var(--o-ice);
+  animation: color-drift-sky 7s ease-in-out infinite alternate;
+}
+
+.voice-color-violet {
+  top: -18%;
+  right: -36%;
+  width: 104%;
+  height: 110%;
+  background: var(--o-orchid);
+  animation: color-drift-violet 6.4s -1.4s ease-in-out infinite alternate;
+}
+
+.voice-color-rose {
+  right: -26%;
+  bottom: -34%;
+  width: 100%;
+  height: 90%;
+  background: var(--o-magenta);
+  animation: color-drift-rose 5.8s -0.8s ease-in-out infinite alternate;
+}
+
+.voice-color-gold {
+  bottom: -34%;
+  left: -30%;
+  width: 96%;
+  height: 90%;
+  background: var(--o-mint);
+  animation: color-drift-gold 6.8s -2.2s ease-in-out infinite alternate;
+}
+
+/* A hot centre that opens with the voice level. */
+.voice-core {
+  inset: 30%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9), color-mix(in srgb, var(--voice-tint) 70%, transparent) 40%, transparent 70%);
+  filter: blur(0.5rem);
+  opacity: calc(0.15 + var(--voice-level) * 0.85);
+  transform: scale(calc(0.8 + var(--voice-level) * 1.1));
+}
+
+.voice-sheen {
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 46% 30% at 32% 20%, rgba(255, 255, 255, 0.55), transparent 100%),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.35) 100%),
+    radial-gradient(ellipse 60% 24% at 60% 92%, color-mix(in srgb, var(--voice-tint) 35%, transparent), transparent 100%);
+  box-shadow: inset 0 0 1.5rem rgba(234, 232, 238, 0.06);
+}
+
+/* ---- On a call ---------------------------------------------------------- */
+body[data-call-state="connecting"] .voice-field::before,
+body[data-call-state="connected"] .voice-field::before,
+body[data-call-state="listening"] .voice-field::before,
+body[data-call-state="speaking"] .voice-field::before {
+  opacity: 0.8;
+}
+
+body[data-call-state="connecting"] .voice-orb {
+  animation: orb-breathe 1.6s ease-in-out infinite;
 }
 
 body[data-call-state="connecting"] .voice-halo,
@@ -468,48 +552,16 @@ body[data-call-state="speaking"] .voice-ring {
   transition: border-color 0.5s ease;
 }
 
-body[data-call-state="connecting"] .voice-field::before,
-body[data-call-state="connected"] .voice-field::before,
-body[data-call-state="listening"] .voice-field::before,
-body[data-call-state="speaking"] .voice-field::before {
-  opacity: 0.78;
-}
-
-body[data-call-state="connecting"] .voice-orb {
-  animation: bloom-connect 1.8s ease-in-out infinite;
-}
-
-body[data-call-state="connected"] .voice-orb,
-body[data-call-state="listening"] .voice-orb {
-  animation: bloom-listen 3.8s ease-in-out infinite;
-}
-
-body[data-call-state="speaking"] .voice-orb {
-  animation: bloom-speak 1.2s ease-in-out infinite;
+body[data-call-state="connected"] .voice-sparks span,
+body[data-call-state="listening"] .voice-sparks span,
+body[data-call-state="speaking"] .voice-sparks span {
+  opacity: 1;
 }
 
 body[data-call-state="connected"] .voice-color,
 body[data-call-state="listening"] .voice-color,
 body[data-call-state="speaking"] .voice-color {
-  opacity: 0.94;
-}
-
-body[data-call-state="connected"] .voice-color-sky,
-body[data-call-state="listening"] .voice-color-sky,
-body[data-call-state="speaking"] .voice-color-sky {
-  animation: color-drift-sky 4.8s ease-in-out infinite alternate;
-}
-
-body[data-call-state="connected"] .voice-color-violet,
-body[data-call-state="listening"] .voice-color-violet,
-body[data-call-state="speaking"] .voice-color-violet {
-  animation: color-drift-violet 4.2s -1.4s ease-in-out infinite alternate;
-}
-
-body[data-call-state="connected"] .voice-color-rose,
-body[data-call-state="listening"] .voice-color-rose,
-body[data-call-state="speaking"] .voice-color-rose {
-  animation: color-drift-rose 3.9s -0.8s ease-in-out infinite alternate;
+  opacity: 0.9;
 }
 
 /* Speaker colouring. These sit after the call-state rules on purpose: same
@@ -521,7 +573,7 @@ body[data-voice="user"] .voice-color-gold {
 
 body[data-voice="user"] .voice-color-violet,
 body[data-voice="user"] .voice-color-rose {
-  opacity: 0.1;
+  opacity: 0.08;
 }
 
 body[data-voice="agent"] .voice-color-violet,
@@ -531,15 +583,16 @@ body[data-voice="agent"] .voice-color-rose {
 
 body[data-voice="agent"] .voice-color-sky,
 body[data-voice="agent"] .voice-color-gold {
-  opacity: 0.1;
+  opacity: 0.08;
 }
 
 body[data-voice="user"] .voice-orb,
 body[data-voice="agent"] .voice-orb {
-  border-color: color-mix(in srgb, var(--voice-tint) 75%, transparent);
   box-shadow:
-    0 0 0 0.0625rem rgba(12, 12, 11, 0.5),
-    0 1.5rem 4rem rgba(0, 0, 0, 0.42),
+    inset 0 -1.75rem 2.5rem rgba(0, 0, 0, 0.6),
+    inset 0 0.125rem 0.75rem rgba(255, 255, 255, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--voice-tint) 70%, transparent),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.5),
     0 0 calc(1.5rem + var(--voice-level) * 4rem) color-mix(in srgb, var(--voice-tint) 70%, transparent),
     0 0 calc(4rem + var(--voice-level) * 8rem) color-mix(in srgb, var(--voice-tint) 30%, transparent);
 }
@@ -549,7 +602,7 @@ body[data-voice="agent"] .voice-orb {
   min-height: 1.5rem;
   align-items: center;
   gap: 0.625rem;
-  color: var(--faint);
+  color: var(--dim);
   font-family: var(--mono);
   font-size: 0.6875rem;
   letter-spacing: 0.12em;
@@ -687,11 +740,11 @@ body[data-voice="agent"] .voice-orb {
 
 .footer {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  padding: 1rem 2.125rem;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  padding: 0.5rem 2.125rem;
   border-top: 1px solid var(--line-strong);
   color: var(--faint);
   font-family: var(--mono);
@@ -700,15 +753,9 @@ body[data-voice="agent"] .voice-orb {
   text-transform: uppercase;
 }
 
-.footer a {
-  color: var(--dim);
-  text-decoration: none;
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.footer a:hover {
-  color: var(--spot);
-  border-bottom-color: var(--spot);
+.footer-note {
+  flex: none;
+  white-space: nowrap;
 }
 
 @keyframes halo-spin {
@@ -717,24 +764,9 @@ body[data-voice="agent"] .voice-orb {
   }
 }
 
-@keyframes bloom-connect {
+@keyframes orb-breathe {
   50% {
-    border-radius: 52% 48% 45% 55% / 47% 55% 45% 53%;
-    transform: rotate(2deg) scale(0.96);
-  }
-}
-
-@keyframes bloom-listen {
-  50% {
-    border-radius: 53% 47% 45% 55% / 48% 56% 44% 52%;
-    transform: rotate(2deg) scale(1.025);
-  }
-}
-
-@keyframes bloom-speak {
-  50% {
-    border-radius: 51% 49% 57% 43% / 45% 54% 46% 55%;
-    transform: rotate(1deg) scale(1.055);
+    transform: scale(1.035);
   }
 }
 
@@ -756,9 +788,16 @@ body[data-voice="agent"] .voice-orb {
   }
 }
 
+@keyframes color-drift-gold {
+  to {
+    transform: translate(11%, -10%) scale(1.09);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .voice-field::before,
   .voice-halo,
+  .voice-sparks span,
   .voice-orb,
   .voice-color {
     animation: none !important;
@@ -766,28 +805,39 @@ body[data-voice="agent"] .voice-orb {
 }
 
 @media (max-width: 40rem) {
+  /* The whole app is one phone screen. dvh tracks the browser chrome so the
+     footer never hides under it, and overflow is closed at the root so the
+     page cannot be scrolled or rubber-banded at all. */
+  html,
+  body {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   .app-shell {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     border-right: 0;
     border-left: 0;
   }
 
   .topbar {
-    height: 3.5rem;
+    height: 3rem;
     padding: 0 1.25rem;
   }
 
   .brand {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
   }
 
   .brand-seal {
     width: 1.75rem;
     height: 1.75rem;
-  }
-
-  .footer {
-    padding: 0.875rem 1.25rem;
-    font-size: 0.5625rem;
   }
 
   .privacy-status {
@@ -796,8 +846,10 @@ body[data-voice="agent"] .voice-orb {
   }
 
   .call-stage {
-    gap: 1.5rem;
-    padding: 3rem 1.25rem 4rem;
+    min-height: 0;
+    justify-content: space-evenly;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem 1rem;
   }
 
   .call-stage::before {
@@ -810,43 +862,69 @@ body[data-voice="agent"] .voice-orb {
     left: -14rem;
   }
 
+  .stage-seal {
+    width: 24rem;
+  }
+
   .heading-group {
-    gap: 1.125rem;
+    gap: 0.75rem;
+  }
+
+  .eyebrow {
+    font-size: 0.625rem;
+    letter-spacing: 0.24em;
+  }
+
+  .eyebrow span {
+    width: 1.75rem;
   }
 
   h1 {
-    max-width: 12ch;
-    font-size: clamp(3rem, 15vw, 4.4rem);
+    max-width: none;
+    font-size: clamp(1.75rem, 8.4vw, 2.6rem);
   }
 
   .description {
-    max-width: 33ch;
-    font-size: 1rem;
+    max-width: 32ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   .voice-field {
-    width: 8.75rem;
-    height: 8.75rem;
+    width: 8.5rem;
+    height: 8.5rem;
   }
 
-  .voice-orb {
+  .voice-halo {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+
+  .voice-ring,
+  .voice-sparks,
+  .voice-sparks span {
     width: 7rem;
     height: 7rem;
   }
 
-  .voice-halo {
-    width: 10rem;
-    height: 10rem;
+  .voice-orb {
+    width: 5.75rem;
+    height: 5.75rem;
   }
 
-  .voice-ring {
-    width: 8.25rem;
-    height: 8.25rem;
+  .start-controls {
+    gap: 0.625rem;
+  }
+
+  .start-controls p {
+    max-width: 34ch;
+    font-size: 0.625rem;
+    line-height: 1.5;
   }
 
   .button {
-    min-height: 3rem;
-    font-size: 0.75rem;
+    min-height: 2.75rem;
+    font-size: 0.6875rem;
   }
 
   .call-controls {
@@ -856,6 +934,21 @@ body[data-voice="agent"] .voice-orb {
 
   .call-controls .button {
     flex: 1;
+  }
+
+  .footer {
+    min-height: 2.75rem;
+    padding: 0.375rem 1.25rem;
+    font-size: 0.5625rem;
+  }
+
+  .footer-note {
+    display: none;
+  }
+
+  .status-line {
+    width: 100%;
+    justify-content: center;
   }
 }
 

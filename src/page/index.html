@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#17171a" />
     <meta name="herdr-call-token" content="__HERDR_CALL_TOKEN__" />
-    <title>At Bryde Ud · Voice line</title>
-    <link rel="icon" type="image/png" href="/logo.png?v=__ASSET_VERSION__" />
+    <title>__BRAND_NAME__ · __BRAND_TAGLINE__</title>
+    <link rel="icon" href="/logo.png?v=__ASSET_VERSION__" />
     <link rel="apple-touch-icon" href="/logo.png?v=__ASSET_VERSION__" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,11 +19,11 @@
   <body>
     <main id="app" class="app-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="At Bryde Ud voice line home">
+        <a class="brand" href="/" aria-label="__BRAND_NAME__ voice line home">
           <img class="brand-seal" src="/logo.png?v=__ASSET_VERSION__" alt="" width="32" height="32" />
           <span class="brand-name">
-            <span>At Bryde Ud</span>
-            <span class="brand-sub">Voice line</span>
+            <span>__BRAND_NAME__</span>
+            <span class="brand-sub">__BRAND_TAGLINE__</span>
           </span>
         </a>
         <div class="privacy-status">
@@ -36,33 +36,28 @@
         <img class="stage-seal" src="/logo.png?v=__ASSET_VERSION__" alt="" aria-hidden="true" />
 
         <div class="heading-group">
-          <p class="eyebrow"><span aria-hidden="true"></span>At Bryde Ud Ltd.</p>
-          <h1 id="call-title">Say the word. <em>The work moves.</em></h1>
+          <p class="eyebrow"><span aria-hidden="true"></span>__BRAND_NAME__</p>
+          <h1 id="call-title"><span class="line">Say the word.</span> <em class="line">The work moves.</em></h1>
           <p id="call-description" class="description">
-            The At Bryde Ud voice line. Speak into the workshop: hear what every agent is doing,
-            free the one waiting on you, or set the next job in motion. From the walk, the car,
-            or the sofa.
+            Speak to the desk: hear what every agent is doing, free the one waiting on you, or
+            set the next job in motion.
           </p>
         </div>
 
         <div class="voice-field" aria-hidden="true">
           <span class="voice-halo"></span>
           <span class="voice-ring"></span>
+          <span class="voice-sparks"><span></span><span></span><span></span></span>
           <span class="voice-orb">
             <span class="voice-orb-fill">
               <span class="voice-color voice-color-sky"></span>
               <span class="voice-color voice-color-violet"></span>
               <span class="voice-color voice-color-rose"></span>
               <span class="voice-color voice-color-gold"></span>
+              <span class="voice-core"></span>
             </span>
             <span class="voice-sheen"></span>
           </span>
-        </div>
-
-        <div class="status-line" aria-live="polite">
-          <span id="status-dot" class="status-dot" data-state="ready" aria-hidden="true"></span>
-          <span id="status-text">Ready</span>
-          <span id="call-duration" class="duration" hidden>00:00</span>
         </div>
 
         <p id="error-message" class="error-message" role="alert" hidden></p>
@@ -70,8 +65,8 @@
         <div id="start-controls" class="start-controls">
           <button id="start-call" class="button button-primary" type="button">Call the desk</button>
           <p>
-            Microphone access is requested once. Audio goes straight to ElevenLabs; everything else
-            stays inside the At Bryde Ud tailnet.
+            Microphone is requested once. Audio goes to ElevenLabs; everything else stays on your
+            tailnet.
           </p>
         </div>
 
@@ -84,9 +79,12 @@
       </section>
 
       <footer class="footer">
-        <span>At Bryde Ud Ltd. · Cayman Islands</span>
-        <span class="footer-sep" aria-hidden="true">·</span>
-        <span>Built on <a href="https://github.com/eliasstravik/herdr-call">Herdr Call</a></span>
+        <div class="status-line" aria-live="polite">
+          <span id="status-dot" class="status-dot" data-state="ready" aria-hidden="true"></span>
+          <span id="status-text">Ready</span>
+          <span id="call-duration" class="duration" hidden>00:00</span>
+        </div>
+        <span class="footer-note">__BRAND_NAME__ · Herdr Call</span>
       </footer>
     </main>
     <script type="module" src="/app.js?v=__ASSET_VERSION__"></script>

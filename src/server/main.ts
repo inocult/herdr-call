@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { loadPluginConfig, saveApiKey, type PluginConfig } from "./config.js";
 import { ElevenLabsSessionProvider } from "./elevenlabs.js";
 import { HerdrClient } from "./herdr.js";
-import { createCallServer, type SessionProvider } from "./http.js";
+import { createCallServer, DEFAULT_BRAND, type PageBrand, type SessionProvider } from "./http.js";
 import { provisionElevenLabsAgent } from "./provision.js";
 import { renderQr } from "./qr.js";
 import { ToolRelay } from "./relay.js";
@@ -61,11 +61,13 @@ async function main(): Promise<void> {
   const sessionProvider = createSessionProvider(config.elevenlabsApiKey, provisionedAgentId);
   const assetsDirectory = fileURLToPath(new URL("../page/", import.meta.url));
   const authToken = randomBytes(32).toString("base64url");
+  const brand = await resolveBrand(config, configDirectory);
   const server = createCallServer({
     relay,
     sessionProvider,
     assetsDirectory,
     authToken,
+    brand,
     ...(settings.tailnetUrl ? { tailnetUrl: settings.tailnetUrl } : {}),
     ...(settings.allowedTailnetUsers ? { allowedTailnetUsers: settings.allowedTailnetUsers } : {}),
   });
@@ -181,6 +183,38 @@ async function provisionIfConfigured(
       : `ElevenLabs agent ${result.agentId} is up to date.\n`,
   );
   return result.agentId;
+}
+
+/** Each environment brands its own call page from the plugin config directory:
+ *  `brand_name` / `brand_tagline` in config.toml, and a logo either named by
+ *  `brand_logo` or dropped next to it as logo.png / logo.svg / logo.jpg. Anything
+ *  missing falls back to the bundled defaults. */
+export async function resolveBrand(config: PluginConfig, configDirectory: string): Promise<PageBrand> {
+  const candidates = [
+    ...(config.brandLogo ? [expandHome(config.brandLogo)] : []),
+    ...["logo.png", "logo.svg", "logo.jpg", "logo.jpeg", "logo.webp"].map((file) =>
+      join(configDirectory, file),
+    ),
+  ];
+  let logoPath: string | undefined;
+  for (const candidate of candidates) {
+    try {
+      await access(candidate);
+      logoPath = candidate;
+      break;
+    } catch {
+      // try the next candidate
+    }
+  }
+  return {
+    name: config.brandName?.trim() || DEFAULT_BRAND.name,
+    tagline: config.brandTagline?.trim() || DEFAULT_BRAND.tagline,
+    ...(logoPath ? { logoPath } : {}),
+  };
+}
+
+function expandHome(path: string): string {
+  return path.startsWith("~/") ? join(homedir(), path.slice(2)) : path;
 }
 
 function createSessionProvider(apiKey: string | undefined, agentId: string | undefined): SessionProvider {

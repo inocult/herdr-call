@@ -8,6 +8,8 @@ export interface PluginConfig {
   tailnetUrl?: string;
   allowedTailnetUsers?: string[];
   autoServe?: boolean;
+  /** Open the call tab from the plugin startup hook every time the Herdr server starts. */
+  openOnStartup?: boolean;
   /** Environment branding shown on the call page; see resolveBrand in main.ts. */
   brandName?: string;
   brandTagline?: string;
@@ -34,6 +36,7 @@ export async function loadPluginConfig(configDirectory: string): Promise<PluginC
       ? { allowedTailnetUsers: parseUserList(values.allowed_tailnet_users) }
       : {}),
     ...(values.auto_serve ? { autoServe: values.auto_serve === "true" } : {}),
+    ...(values.open_on_startup ? { openOnStartup: values.open_on_startup === "true" } : {}),
     ...(values.brand_name ? { brandName: values.brand_name } : {}),
     ...(values.brand_tagline ? { brandTagline: values.brand_tagline } : {}),
     ...(values.brand_logo ? { brandLogo: values.brand_logo } : {}),

@@ -14,6 +14,7 @@ Each machine names itself in the plugin config directory (`herdr plugin config-d
 brand_name = "At Bryde Ud"      # header, eyebrow, page title, footer
 brand_tagline = "Voice line"    # small line under the name
 brand_logo = "~/logos/seal.png" # optional; otherwise logo.png / logo.svg / logo.jpg next to config.toml
+open_on_startup = true         # optional; open the call tab on every Herdr start
 ```
 
 The logo is served at `/logo.png` and used as the header mark, favicon, and the faint emblem behind the call stage. Anything unset falls back to "Herdr" and the bundled seal. Restart the call pane after changing these.

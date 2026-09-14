@@ -7,6 +7,12 @@ export interface HerdrRequester {
 export interface StartOrFocusCallOptions {
   herdr: HerdrRequester;
   pluginRoot: string;
+  /**
+   * Whether the call pane should end up focused. The startup hook passes false so a
+   * machine that opens the call on every Herdr start does not steal the focus the
+   * restored session came back with.
+   */
+  focus?: boolean;
 }
 
 export type StartOrFocusCallResult =
@@ -16,8 +22,10 @@ export type StartOrFocusCallResult =
 export async function startOrFocusCall(
   options: StartOrFocusCallOptions,
 ): Promise<StartOrFocusCallResult> {
+  const focus = options.focus ?? true;
   const result = asRecord(await options.herdr.request("pane.list", {}));
   const panes = Array.isArray(result.panes) ? result.panes.map(asRecord) : [];
+  const previouslyFocused = panes.find((pane) => pane.focused === true);
 
   for (const pane of panes) {
     if (
@@ -29,7 +37,10 @@ export async function startOrFocusCall(
     }
 
     try {
+      // Focusing is also how a plugin-owned pane is told apart from a pane the user
+      // named "Herdr Call" or a dead one a session restore brought back as a shell.
       await options.herdr.request("plugin.pane.focus", { pane_id: pane.pane_id });
+      if (!focus) await restoreFocus(options.herdr, previouslyFocused, pane.pane_id);
       return { status: "focused", paneId: pane.pane_id };
     } catch (error) {
       if (
@@ -48,7 +59,7 @@ export async function startOrFocusCall(
       plugin_id: "herdr-call",
       entrypoint: "call",
       placement: "tab",
-      focus: true,
+      focus,
     }),
   );
   const pluginPane = asRecord(opened.plugin_pane);
@@ -57,6 +68,17 @@ export async function startOrFocusCall(
     throw new Error("Herdr opened the call pane without returning its pane id");
   }
   return { status: "opened", paneId: pane.pane_id };
+}
+
+/** Hand the focus back to the pane that had it before the ownership probe moved it. */
+async function restoreFocus(
+  herdr: HerdrRequester,
+  previouslyFocused: Record<string, unknown> | undefined,
+  callPaneId: string,
+): Promise<void> {
+  const paneId = previouslyFocused?.pane_id;
+  if (typeof paneId !== "string" || paneId === callPaneId) return;
+  await herdr.request("pane.focus", { pane_id: paneId });
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

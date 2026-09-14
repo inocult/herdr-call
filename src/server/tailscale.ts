@@ -65,19 +65,26 @@ export async function discoverTailnet(runner: CommandRunner): Promise<TailnetDis
   return result.ok ? parseTailnetStatus(result.stdout) : undefined;
 }
 
-/** Configure the persistent tailnet-only HTTPS mapping. Idempotent; never throws. */
+/**
+ * Configure the persistent tailnet-only HTTPS mapping. Idempotent; never throws.
+ *
+ * The HTTPS port must be named explicitly: `tailscale serve --bg <port>` reads the bare port as
+ * the *target* to proxy to and publishes it on the tailnet's default HTTPS port 443, which is not
+ * the URL deriveRuntimeSettings advertises. Naming both ends keeps the mapping on the same port
+ * the call server listens on.
+ */
 export async function ensureServe(
   runner: CommandRunner,
   port: number,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const result = await runner(["serve", "--bg", String(port)]);
+  const result = await runner(["serve", "--bg", `--https=${port}`, `http://127.0.0.1:${port}`]);
   if (result.ok) return { ok: true };
   const reason = (result.stderr || result.stdout).trim();
   return {
     ok: false,
     message:
       `Could not configure Tailscale Serve automatically (${reason}). ` +
-      `Run it manually: tailscale serve --bg ${port}`,
+      `Run it manually: tailscale serve --bg --https=${port} http://127.0.0.1:${port}`,
   };
 }
 

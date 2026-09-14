@@ -93,7 +93,7 @@ test("a tagged device serves but defaults to no identity allowlist", () => {
   assert.equal(settings.allowedTailnetUsers, undefined);
 });
 
-test("ensureServe runs the persistent background serve for the call port", async () => {
+test("ensureServe publishes the call port on the same HTTPS port it advertises", async () => {
   const calls: string[][] = [];
   const runner: CommandRunner = async (args) => {
     calls.push(args);
@@ -101,7 +101,23 @@ test("ensureServe runs the persistent background serve for the call port", async
   };
   const result = await ensureServe(runner, 47_831);
   assert.deepEqual(result, { ok: true });
-  assert.deepEqual(calls, [["serve", "--bg", "47831"]]);
+  assert.deepEqual(calls, [["serve", "--bg", "--https=47831", "http://127.0.0.1:47831"]]);
+});
+
+test("the served HTTPS port is the port in the advertised tailnet URL", async () => {
+  const calls: string[][] = [];
+  const runner: CommandRunner = async (args) => {
+    calls.push(args);
+    return { ok: true, stdout: "", stderr: "" };
+  };
+  await ensureServe(runner, 47_831);
+  const { tailnetUrl } = deriveRuntimeSettings(
+    {},
+    { hostname: "workstation.example-tail.ts.net" },
+    47_831,
+  );
+  const servedPort = calls[0]?.find((argument) => argument.startsWith("--https="))?.slice(8);
+  assert.equal(new URL(String(tailnetUrl)).port, servedPort);
 });
 
 test("a failed serve reports the manual command instead of throwing", async () => {
@@ -112,6 +128,9 @@ test("a failed serve reports the manual command instead of throwing", async () =
   });
   const result = await ensureServe(runner, 47_831);
   assert.equal(result.ok, false);
-  assert.match((result as { message: string }).message, /tailscale serve --bg 47831/u);
+  assert.match(
+    (result as { message: string }).message,
+    /tailscale serve --bg --https=47831 http:\/\/127\.0\.0\.1:47831/u,
+  );
   assert.match((result as { message: string }).message, /Access denied: serve config denied/u);
 });

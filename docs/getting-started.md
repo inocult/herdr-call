@@ -88,7 +88,8 @@ Everything below is optional. `config.toml` lives in the plugin's `HERDR_PLUGIN_
 With `auto_serve = false`, expose the call yourself when you want it reachable:
 
 ```bash
-tailscale serve --bg 47831        # tailnet-only; remove with: tailscale serve --https=47831 off
+tailscale serve --bg --https=47831 http://127.0.0.1:47831   # tailnet-only
+tailscale serve --https=47831 off                           # remove it again
 ```
 
 Use **Serve**, never **Funnel** — Funnel would expose the endpoint to the public internet.

@@ -84,6 +84,7 @@ Everything below is optional. `config.toml` lives in the plugin's `HERDR_PLUGIN_
 | `tailnet_url` | discovered from Tailscale | Override the call URL and Host allowlist |
 | `allowed_tailnet_users` | your own tailnet login | Widen access, e.g. `"you@example.com, teammate@example.com"` |
 | `auto_serve` | `true` | Set `false` to never touch Tailscale Serve |
+| `open_on_startup` | `false` | Set `true` to open the call tab every time the Herdr server starts |
 
 With `auto_serve = false`, expose the call yourself when you want it reachable:
 
@@ -93,6 +94,16 @@ tailscale serve --https=47831 off                           # remove it again
 ```
 
 Use **Serve**, never **Funnel** — Funnel would expose the endpoint to the public internet.
+
+### Open the call tab on every Herdr start
+
+The plugin's startup hook runs whenever the Herdr server starts. Give it `open_on_startup = true` and the call tab is already there when you attach:
+
+```toml
+open_on_startup = true
+```
+
+The tab opens in the background, so the workspace, tab, and pane you started in keep the focus. Without the flag the hook exits without touching your session, which is the default.
 
 ## Security
 

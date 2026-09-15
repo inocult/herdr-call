@@ -71,3 +71,21 @@ test("saveApiKey rejects a key that would break the config file syntax", async (
     message: /control characters|quotes|invalid/iu,
   });
 });
+
+test("open_on_startup = true is parsed as a bare boolean", async () => {
+  const directory = await configDirectoryWith("open_on_startup = true\n");
+  const config = await loadPluginConfig(directory);
+  assert.equal(config.openOnStartup, true);
+});
+
+test("open_on_startup = false keeps the startup hook quiet", async () => {
+  const directory = await configDirectoryWith("open_on_startup = false\n");
+  const config = await loadPluginConfig(directory);
+  assert.equal(config.openOnStartup, false);
+});
+
+test("openOnStartup is absent when config.toml does not set it", async () => {
+  const directory = await configDirectoryWith('elevenlabs_api_key = "sk_test"\n');
+  const config = await loadPluginConfig(directory);
+  assert.equal(config.openOnStartup, undefined);
+});

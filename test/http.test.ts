@@ -296,3 +296,31 @@ test("GET /logo.png serves the bundled logo as a cacheable PNG", async () => {
   // PNG signature: 89 50 4E 47
   assert.deepEqual([...bytes.slice(0, 4)], [0x89, 0x50, 0x4e, 0x47]);
 });
+
+test("GET / paints the environment palette over the stylesheet defaults", async () => {
+  const { join } = await import("node:path");
+  const assetsDirectory = join(process.cwd(), "src", "page");
+
+  const plain = await (await fetch(`${await startServer({ assetsDirectory })}/`)).text();
+  // No palette configured: the placeholders are still spent, never served raw.
+  assert.ok(!plain.includes("__BRAND_PALETTE__"));
+  assert.ok(!plain.includes("__BRAND_THEME_COLOUR__"));
+  assert.match(plain, /<meta name="theme-color" content="#141318"/u);
+
+  const branded = await startServer({
+    assetsDirectory,
+    brand: {
+      name: "Studio 3",
+      tagline: "Venture studio",
+      palette: { color: "#e8536f", colorAlt: "#ffb38a", deep: "#2b1030", bg: "#17101a" },
+    },
+  });
+  const html = await (await fetch(`${branded}/`)).text();
+  assert.match(html, /<style>:root\{[^<]*--spot:#e8536f/u);
+  assert.match(html, /--o-aqua:#ffb38a/u);
+  assert.match(html, /--o-plum:#2b1030/u);
+  assert.match(html, /--bg:#17101a/u);
+  assert.match(html, /<meta name="theme-color" content="#17101a"/u);
+  // The override must land after styles.css or the cascade would ignore it.
+  assert.ok(html.indexOf("styles.css") < html.indexOf("<style>:root{"));
+});

@@ -11,13 +11,22 @@
 Each machine names itself in the plugin config directory (`herdr plugin config-dir herdr-call`):
 
 ```toml
-brand_name = "At Bryde Ud"      # header, eyebrow, page title, footer
+brand_name = "At Bryde Ud"      # header, eyebrow, page title, footer, and the spoken greeting
 brand_tagline = "Voice line"    # small line under the name
 brand_logo = "~/logos/seal.png" # optional; otherwise logo.png / logo.svg / logo.jpg next to config.toml
-open_on_startup = true         # optional; open the call tab on every Herdr start
+open_on_startup = true          # optional; open the call tab on every Herdr start
+
+brand_color = "#4d94ff"         # the signature colour: buttons, links, orb while the desk speaks
+brand_color_alt = "#8fd9ff"     # the orb while YOU speak — pick a clearly different hue
+brand_deep = "#0f1c3d"          # the inside of the orb, a near-black version of the brand
+brand_bg = "#0e1220"            # the page ground; panels, grid and rules are derived from it
 ```
 
 The logo is served at `/logo.png` and used as the header mark, favicon, and the faint emblem behind the call stage. Anything unset falls back to "Herdr" and the bundled seal. Restart the call pane after changing these.
+
+`brand_name` is also the environment the operator names out loud — the greeting is "what would you like to do in *At Bryde Ud*?", not "in Herdr" — and it names the provisioned ElevenLabs agent, so several machines can share one ElevenLabs account and still be told apart in its dashboard.
+
+The four colours are the whole palette. Everything else on the page is derived from them: the neutrals step off `brand_bg`, primary-button ink *is* `brand_bg` so it stays legible on any accent, the phone's browser chrome matches the ground, and the two transitional tones in the orb's aurora are blends of the accents, so the orb turns in this environment's colours rather than the stock ones. Values must be hex — anything else is refused at load with the key named. Setting none of them keeps the stock gold-on-black.
 
 <hr />
 

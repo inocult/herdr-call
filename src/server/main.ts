@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   let config = await loadPluginConfig(configDirectory);
 
   if (process.argv.includes("--provision-only")) {
-    await provisionIfConfigured(config.elevenlabsApiKey, config.voiceId);
+    await provisionIfConfigured(config);
     if (!config.elevenlabsApiKey) {
       process.stdout.write(
         "Herdr Call setup pending: run `herdr plugin action invoke start --plugin herdr-call` to finish setup.\n",
@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   }
 
   config = await ensureApiKey(config, configDirectory);
-  const provisionedAgentId = await provisionIfConfigured(config.elevenlabsApiKey, config.voiceId);
+  const provisionedAgentId = await provisionIfConfigured(config);
 
   const socketPath =
     process.env.HERDR_SOCKET_PATH ?? join(homedir(), ".config", "herdr", "herdr.sock");
@@ -158,10 +158,8 @@ async function announce(
   }
 }
 
-async function provisionIfConfigured(
-  apiKey: string | undefined,
-  voiceId: string | undefined,
-): Promise<string | undefined> {
+async function provisionIfConfigured(config: PluginConfig): Promise<string | undefined> {
+  const apiKey = config.elevenlabsApiKey;
   if (!apiKey) return undefined;
   const stateDirectory = requiredEnvironment("HERDR_PLUGIN_STATE_DIR");
   const packagePath = fileURLToPath(new URL("../../package.json", import.meta.url));
@@ -175,7 +173,8 @@ async function provisionIfConfigured(
     pluginVersion: packageJson.version,
     promptPath,
     stateDirectory,
-    ...(voiceId ? { voiceId } : {}),
+    ...(config.voiceId ? { voiceId: config.voiceId } : {}),
+    ...(config.brandName?.trim() ? { brandName: config.brandName.trim() } : {}),
   });
   process.stdout.write(
     result.changed
@@ -186,9 +185,10 @@ async function provisionIfConfigured(
 }
 
 /** Each environment brands its own call page from the plugin config directory:
- *  `brand_name` / `brand_tagline` in config.toml, and a logo either named by
- *  `brand_logo` or dropped next to it as logo.png / logo.svg / logo.jpg. Anything
- *  missing falls back to the bundled defaults. */
+ *  `brand_name` / `brand_tagline` in config.toml, a logo either named by
+ *  `brand_logo` or dropped next to it as logo.png / logo.svg / logo.jpg, and the
+ *  colours in `brand_color` / `brand_color_alt` / `brand_deep` / `brand_bg`.
+ *  Anything missing falls back to the bundled defaults. */
 export async function resolveBrand(config: PluginConfig, configDirectory: string): Promise<PageBrand> {
   const candidates = [
     ...(config.brandLogo ? [expandHome(config.brandLogo)] : []),
@@ -210,6 +210,7 @@ export async function resolveBrand(config: PluginConfig, configDirectory: string
     name: config.brandName?.trim() || DEFAULT_BRAND.name,
     tagline: config.brandTagline?.trim() || DEFAULT_BRAND.tagline,
     ...(logoPath ? { logoPath } : {}),
+    ...(config.brandPalette ? { palette: config.brandPalette } : {}),
   };
 }
 

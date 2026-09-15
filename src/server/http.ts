@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { authorizeHost, authorizeRequest, createAuthPolicy, tokenCookie } from "./auth.js";
+import { paletteCss, themeColour, type BrandPalette } from "./palette.js";
 
 export interface RelayHandler {
   handle(name: string, input: unknown): Promise<unknown>;
@@ -19,6 +20,8 @@ export interface PageBrand {
   tagline: string;
   /** Absolute path of an image to serve instead of the bundled logo. */
   logoPath?: string;
+  /** Colour overrides for this environment; see palette.ts. */
+  palette?: BrandPalette;
 }
 
 export const DEFAULT_BRAND: PageBrand = { name: "Herdr", tagline: "Voice line" };
@@ -37,6 +40,8 @@ export interface CallServerOptions {
 const TOKEN_PLACEHOLDER = "__HERDR_CALL_TOKEN__";
 const BRAND_NAME_PLACEHOLDER = "__BRAND_NAME__";
 const BRAND_TAGLINE_PLACEHOLDER = "__BRAND_TAGLINE__";
+const BRAND_PALETTE_PLACEHOLDER = "__BRAND_PALETTE__";
+const BRAND_THEME_COLOUR_PLACEHOLDER = "__BRAND_THEME_COLOUR__";
 
 export class CallEventHub {
   readonly #clients = new Set<ServerResponse>();
@@ -127,11 +132,16 @@ export function createCallServer(options: CallServerOptions): Server {
           if (asset.file === "index.html") {
             headers["Set-Cookie"] = tokenCookie(options.authToken);
             const brand = options.brand ?? DEFAULT_BRAND;
+            const palette = brand.palette ?? {};
             const html = rawContents
               .toString("utf8")
               .replaceAll(TOKEN_PLACEHOLDER, options.authToken)
               .replaceAll(BRAND_NAME_PLACEHOLDER, escapeHtml(brand.name))
-              .replaceAll(BRAND_TAGLINE_PLACEHOLDER, escapeHtml(brand.tagline));
+              .replaceAll(BRAND_TAGLINE_PLACEHOLDER, escapeHtml(brand.tagline))
+              // Already proven to be hex by the config loader, so there is no
+              // way for a config value to close the <style> block and inject.
+              .replaceAll(BRAND_PALETTE_PLACEHOLDER, paletteCss(palette))
+              .replaceAll(BRAND_THEME_COLOUR_PLACEHOLDER, themeColour(palette));
             response.writeHead(200, headers);
             response.end(html);
             return;

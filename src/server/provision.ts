@@ -17,8 +17,30 @@ const STATE_FILE = "provisioning.json";
 
 export const ELEVENLABS_AGENT_NAME = "herdr-voice";
 export const ELEVENLABS_LLM = "qwen35-397b-a17b";
-export const ELEVENLABS_FIRST_MESSAGE = "Hey there — what would you like to do in Herdr?";
 export const DEFAULT_VOICE_ID = "JSWO6cw2AyFE324d5kEr";
+
+/** The placeholder the prompt uses wherever it names the organisation being run. */
+const BRAND_NAME_PLACEHOLDER = "__BRAND_NAME__";
+const DEFAULT_BRAND_NAME = "Herdr";
+
+/** The greeting names the ENVIRONMENT, not the product. On a fleet where four
+ *  machines answer in the same voice, "what would you like to do in Studio 3?"
+ *  is the only thing that tells you which desk picked up. */
+export function firstMessageFor(brandName?: string): string {
+  return `Hey there — what would you like to do in ${brandName?.trim() || DEFAULT_BRAND_NAME}?`;
+}
+
+/** Four environments sharing one ElevenLabs account produce four agents. They are
+ *  distinguished by their own state files, so this name exists purely so the
+ *  account's dashboard is readable by a human. */
+export function agentNameFor(brandName?: string): string {
+  const brand = brandName?.trim();
+  return brand && brand !== DEFAULT_BRAND_NAME
+    ? `${ELEVENLABS_AGENT_NAME} (${brand})`
+    : ELEVENLABS_AGENT_NAME;
+}
+
+export const ELEVENLABS_FIRST_MESSAGE = firstMessageFor();
 
 interface ProvisioningState {
   stateVersion: 1;
@@ -34,6 +56,9 @@ export interface ProvisionOptions {
   promptPath: string;
   stateDirectory: string;
   voiceId?: string;
+  /** This environment's name, from `brand_name`. Substituted into the prompt and
+   *  the greeting so the operator speaks as this desk rather than as "Herdr". */
+  brandName?: string;
   fetch?: typeof globalThis.fetch;
 }
 
@@ -46,9 +71,17 @@ export interface ProvisionResult {
 export async function provisionElevenLabsAgent(
   options: ProvisionOptions,
 ): Promise<ProvisionResult> {
-  const prompt = await readFile(options.promptPath, "utf8");
+  const brandName = options.brandName?.trim() || DEFAULT_BRAND_NAME;
+  const prompt = (await readFile(options.promptPath, "utf8")).replaceAll(
+    BRAND_NAME_PLACEHOLDER,
+    brandName,
+  );
   const voiceId = options.voiceId ?? DEFAULT_VOICE_ID;
-  const stamp = provisioningStamp(options.pluginVersion, prompt, voiceId);
+  const firstMessage = firstMessageFor(brandName);
+  const agentName = agentNameFor(brandName);
+  // The prompt is stamped AFTER substitution, so renaming an environment in
+  // config.toml is a real change and re-provisions rather than going unnoticed.
+  const stamp = provisioningStamp(options.pluginVersion, prompt, voiceId, firstMessage, agentName);
   const previous = await readState(options.stateDirectory);
   if (previous?.stamp === stamp) {
     return { agentId: previous.agentId, stamp, changed: false };
@@ -80,10 +113,10 @@ export async function provisionElevenLabsAgent(
   }
 
   const agentBody = {
-    name: ELEVENLABS_AGENT_NAME,
+    name: agentName,
     conversation_config: {
       agent: {
-        first_message: ELEVENLABS_FIRST_MESSAGE,
+        first_message: firstMessage,
         language: "en",
         prompt: {
           prompt,
@@ -167,7 +200,13 @@ function convertSchema(schema: JsonSchema, root: boolean, label: string): Record
   return output;
 }
 
-function provisioningStamp(pluginVersion: string, prompt: string, voiceId: string): string {
+function provisioningStamp(
+  pluginVersion: string,
+  prompt: string,
+  voiceId: string,
+  firstMessage: string,
+  agentName: string,
+): string {
   return createHash("sha256")
     .update(
       JSON.stringify({
@@ -175,7 +214,8 @@ function provisioningStamp(pluginVersion: string, prompt: string, voiceId: strin
         prompt,
         voiceId,
         llm: ELEVENLABS_LLM,
-        firstMessage: ELEVENLABS_FIRST_MESSAGE,
+        firstMessage,
+        agentName,
         tools: TOOLS.map(
           ({ name, description, parameters, guarded, responseTimeoutSeconds }) => ({
             name,

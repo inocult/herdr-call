@@ -111,6 +111,11 @@ button:disabled {
   text-decoration: none;
 }
 
+/* The badge is a disc BEHIND the mark, so it has to be the opposite of whatever
+   the mark is made of. White suits the dark-on-light logos most brands hand you;
+   a mark that is already light, or one floating on transparency, would disappear
+   on white, so those get the page's own dark field instead. app.ts has already
+   classified the artwork for the watermark -- this reuses that verdict. */
 .brand-seal {
   width: 2rem;
   height: 2rem;
@@ -118,7 +123,12 @@ button:disabled {
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: #fff;
-  box-shadow: 0 0 0 0.1875rem rgba(230, 192, 122, 0.14);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--spot) 14%, transparent);
+}
+
+body[data-seal="light-on-dark"] .brand-seal,
+body[data-seal="transparent"] .brand-seal {
+  background: var(--mass);
 }
 
 .brand-name {

@@ -1,6 +1,8 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { normalizeHexColour, type BrandPalette } from "./palette.js";
+
 export interface PluginConfig {
   elevenlabsApiKey?: string;
   agentId?: string;
@@ -14,6 +16,8 @@ export interface PluginConfig {
   brandName?: string;
   brandTagline?: string;
   brandLogo?: string;
+  /** Per-environment colour; see palette.ts. Absent keys keep the stock palette. */
+  brandPalette?: BrandPalette;
 }
 
 export async function loadPluginConfig(configDirectory: string): Promise<PluginConfig> {
@@ -27,6 +31,7 @@ export async function loadPluginConfig(configDirectory: string): Promise<PluginC
   }
 
   const values = parseFlatToml(source);
+  const palette = readPalette(values);
   return {
     ...(values.elevenlabs_api_key ? { elevenlabsApiKey: values.elevenlabs_api_key } : {}),
     ...(values.agent_id ? { agentId: values.agent_id } : {}),
@@ -40,7 +45,24 @@ export async function loadPluginConfig(configDirectory: string): Promise<PluginC
     ...(values.brand_name ? { brandName: values.brand_name } : {}),
     ...(values.brand_tagline ? { brandTagline: values.brand_tagline } : {}),
     ...(values.brand_logo ? { brandLogo: values.brand_logo } : {}),
+    ...(palette ? { brandPalette: palette } : {}),
   };
+}
+
+/** Reject a malformed colour at load, where the message can name the file and the
+ *  key, rather than shipping a broken <style> block to the page. */
+function readPalette(values: Record<string, string>): BrandPalette | undefined {
+  const palette: BrandPalette = {
+    ...maybe("color", normalizeHexColour(values.brand_color, "brand_color")),
+    ...maybe("colorAlt", normalizeHexColour(values.brand_color_alt, "brand_color_alt")),
+    ...maybe("deep", normalizeHexColour(values.brand_deep, "brand_deep")),
+    ...maybe("bg", normalizeHexColour(values.brand_bg, "brand_bg")),
+  };
+  return Object.keys(palette).length > 0 ? palette : undefined;
+}
+
+function maybe<K extends string>(key: K, value: string | undefined): Partial<Record<K, string>> {
+  return value ? ({ [key]: value } as Record<K, string>) : {};
 }
 
 /** Persist the API key from the first-run prompt, keeping any keys the user already set. */
